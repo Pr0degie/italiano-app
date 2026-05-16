@@ -156,13 +156,14 @@ final homeDataProvider = FutureProvider.autoDispose<HomeData>((ref) async {
 
 // ── Daily activity helper ─────────────────────────────────────────────────────
 
-Future<void> recordItemsDone(AppDatabase db, int count) async {
+Future<void> recordItemsDone(AppDatabase db, int count,
+    {bool isLesson = false}) async {
   final today = _todayStr();
   final existing = await (db.select(db.dailyActivity)
         ..where((a) => a.date.equals(today)))
       .getSingleOrNull();
   final newCount = (existing?.itemsDone ?? 0) + count;
-  final newLessons = (existing?.lessonsDone ?? 0) + 1;
+  final newLessons = (existing?.lessonsDone ?? 0) + (isLesson ? 1 : 0);
   final goalMet = newCount >= AppConstants.dailyGoalItems;
   await db.into(db.dailyActivity).insertOnConflictUpdate(
         DailyActivityCompanion.insert(

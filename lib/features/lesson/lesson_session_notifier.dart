@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/database/database.dart';
 import '../../core/database/providers.dart';
 import '../../core/seeding/sentence_exercises.dart';
-import '../../core/sm2/sm2.dart';
 import '../home/home_providers.dart';
 import 'lesson_providers.dart';
 
@@ -167,28 +166,20 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
     final now = DateTime.now();
 
     await db.transaction(() async {
-      // Nur MC-Steps haben itemId für SM-2
+      // Neue Items in Phase 1 (Daily Drill) eintragen — nur wenn noch kein Eintrag existiert
       for (var i = 0; i < steps.length; i++) {
         final step = steps[i];
         if (step is! MCExerciseStep) continue;
         final itemId = step.vocab.itemId;
-        final correct = results[i] ?? false;
         final existing = await (db.select(db.reviewState)
               ..where((r) => r.itemId.equals(itemId)))
             .getSingleOrNull();
-        final sm2 = SM2.apply(
-          easiness: existing?.easiness ?? 2.5,
-          interval: existing?.interval ?? 0,
-          repetitions: existing?.repetitions ?? 0,
-          correct: correct,
-        );
+        if (existing != null) continue; // bereits bekannt, nicht überschreiben
         await db.into(db.reviewState).insertOnConflictUpdate(
               ReviewStateCompanion.insert(
                 itemId: itemId,
-                easiness: Value(sm2.easiness),
-                interval: Value(sm2.interval),
-                repetitions: Value(sm2.repetitions),
-                dueDate: Value(sm2.dueDate),
+                // Phase-1-Start: kein dueDate, kein Streak, noch nicht reviewed
+                dueDate: const Value(null),
                 lastReviewed: Value(now),
               ),
             );
@@ -207,7 +198,7 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
             ),
           );
 
-      await recordItemsDone(db, steps.length);
+      await recordItemsDone(db, steps.length, isLesson: true);
     });
   }
 }

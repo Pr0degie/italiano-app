@@ -222,7 +222,11 @@ class ReviewSessionNotifier extends Notifier<ReviewSessionState> {
     final distractors = pool.take(3).map((v) => McOption(
           text: showItaliano ? v.translationDe : v.italiano,
           isCorrect: false,
-        ));
+        )).toList();
+    // Auffüllen falls weniger als 3 Distraktoren vorhanden
+    while (distractors.length < 3) {
+      distractors.add(McOption(text: '—', isCorrect: false));
+    }
     return [McOption(text: correctText, isCorrect: true), ...distractors]
       ..shuffle(_rng);
   }
@@ -266,7 +270,7 @@ class ReviewSessionNotifier extends Notifier<ReviewSessionState> {
         retryCount: newRetryCount,
         clearSelected: true,
       );
-      _recordActivity(state.steps.length + state.retryQueue.length);
+      _recordActivity(state.results.length);
     } else {
       state = state.copyWith(
         currentIndex: next,
