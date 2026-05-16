@@ -30,7 +30,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -40,6 +40,14 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(chapters);
             await m.createTable(chapterTranslations);
             await m.addColumn(lessons, lessons.chapterId);
+          }
+          if (from < 3) {
+            await m.addColumn(reviewState, reviewState.lastReviewedDate);
+            await m.addColumn(
+                reviewState, reviewState.consecutiveCorrectDays);
+            await m.addColumn(reviewState, reviewState.masteredAt);
+            // dueDate nullable machen geht per migration nicht direkt —
+            // bestehende Zeilen behalten ihren dueDate-Wert, neue können null haben.
           }
         },
       );

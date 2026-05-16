@@ -3483,9 +3483,9 @@ class $ReviewStateTable extends ReviewState
   late final GeneratedColumn<DateTime> dueDate = GeneratedColumn<DateTime>(
     'due_date',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _lastReviewedMeta = const VerificationMeta(
     'lastReviewed',
@@ -3493,6 +3493,39 @@ class $ReviewStateTable extends ReviewState
   @override
   late final GeneratedColumn<DateTime> lastReviewed = GeneratedColumn<DateTime>(
     'last_reviewed',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastReviewedDateMeta = const VerificationMeta(
+    'lastReviewedDate',
+  );
+  @override
+  late final GeneratedColumn<String> lastReviewedDate = GeneratedColumn<String>(
+    'last_reviewed_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _consecutiveCorrectDaysMeta =
+      const VerificationMeta('consecutiveCorrectDays');
+  @override
+  late final GeneratedColumn<int> consecutiveCorrectDays = GeneratedColumn<int>(
+    'consecutive_correct_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _masteredAtMeta = const VerificationMeta(
+    'masteredAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> masteredAt = GeneratedColumn<DateTime>(
+    'mastered_at',
     aliasedName,
     true,
     type: DriftSqlType.dateTime,
@@ -3506,6 +3539,9 @@ class $ReviewStateTable extends ReviewState
     repetitions,
     dueDate,
     lastReviewed,
+    lastReviewedDate,
+    consecutiveCorrectDays,
+    masteredAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3553,8 +3589,6 @@ class $ReviewStateTable extends ReviewState
         _dueDateMeta,
         dueDate.isAcceptableOrUnknown(data['due_date']!, _dueDateMeta),
       );
-    } else if (isInserting) {
-      context.missing(_dueDateMeta);
     }
     if (data.containsKey('last_reviewed')) {
       context.handle(
@@ -3563,6 +3597,30 @@ class $ReviewStateTable extends ReviewState
           data['last_reviewed']!,
           _lastReviewedMeta,
         ),
+      );
+    }
+    if (data.containsKey('last_reviewed_date')) {
+      context.handle(
+        _lastReviewedDateMeta,
+        lastReviewedDate.isAcceptableOrUnknown(
+          data['last_reviewed_date']!,
+          _lastReviewedDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('consecutive_correct_days')) {
+      context.handle(
+        _consecutiveCorrectDaysMeta,
+        consecutiveCorrectDays.isAcceptableOrUnknown(
+          data['consecutive_correct_days']!,
+          _consecutiveCorrectDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('mastered_at')) {
+      context.handle(
+        _masteredAtMeta,
+        masteredAt.isAcceptableOrUnknown(data['mastered_at']!, _masteredAtMeta),
       );
     }
     return context;
@@ -3593,10 +3651,22 @@ class $ReviewStateTable extends ReviewState
       dueDate: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}due_date'],
-      )!,
+      ),
       lastReviewed: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_reviewed'],
+      ),
+      lastReviewedDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_reviewed_date'],
+      ),
+      consecutiveCorrectDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}consecutive_correct_days'],
+      )!,
+      masteredAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}mastered_at'],
       ),
     );
   }
@@ -3612,15 +3682,21 @@ class ReviewStateData extends DataClass implements Insertable<ReviewStateData> {
   final double easiness;
   final int interval;
   final int repetitions;
-  final DateTime dueDate;
+  final DateTime? dueDate;
   final DateTime? lastReviewed;
+  final String? lastReviewedDate;
+  final int consecutiveCorrectDays;
+  final DateTime? masteredAt;
   const ReviewStateData({
     required this.itemId,
     required this.easiness,
     required this.interval,
     required this.repetitions,
-    required this.dueDate,
+    this.dueDate,
     this.lastReviewed,
+    this.lastReviewedDate,
+    required this.consecutiveCorrectDays,
+    this.masteredAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3629,9 +3705,18 @@ class ReviewStateData extends DataClass implements Insertable<ReviewStateData> {
     map['easiness'] = Variable<double>(easiness);
     map['interval'] = Variable<int>(interval);
     map['repetitions'] = Variable<int>(repetitions);
-    map['due_date'] = Variable<DateTime>(dueDate);
+    if (!nullToAbsent || dueDate != null) {
+      map['due_date'] = Variable<DateTime>(dueDate);
+    }
     if (!nullToAbsent || lastReviewed != null) {
       map['last_reviewed'] = Variable<DateTime>(lastReviewed);
+    }
+    if (!nullToAbsent || lastReviewedDate != null) {
+      map['last_reviewed_date'] = Variable<String>(lastReviewedDate);
+    }
+    map['consecutive_correct_days'] = Variable<int>(consecutiveCorrectDays);
+    if (!nullToAbsent || masteredAt != null) {
+      map['mastered_at'] = Variable<DateTime>(masteredAt);
     }
     return map;
   }
@@ -3642,10 +3727,19 @@ class ReviewStateData extends DataClass implements Insertable<ReviewStateData> {
       easiness: Value(easiness),
       interval: Value(interval),
       repetitions: Value(repetitions),
-      dueDate: Value(dueDate),
+      dueDate: dueDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dueDate),
       lastReviewed: lastReviewed == null && nullToAbsent
           ? const Value.absent()
           : Value(lastReviewed),
+      lastReviewedDate: lastReviewedDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastReviewedDate),
+      consecutiveCorrectDays: Value(consecutiveCorrectDays),
+      masteredAt: masteredAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(masteredAt),
     );
   }
 
@@ -3659,8 +3753,13 @@ class ReviewStateData extends DataClass implements Insertable<ReviewStateData> {
       easiness: serializer.fromJson<double>(json['easiness']),
       interval: serializer.fromJson<int>(json['interval']),
       repetitions: serializer.fromJson<int>(json['repetitions']),
-      dueDate: serializer.fromJson<DateTime>(json['dueDate']),
+      dueDate: serializer.fromJson<DateTime?>(json['dueDate']),
       lastReviewed: serializer.fromJson<DateTime?>(json['lastReviewed']),
+      lastReviewedDate: serializer.fromJson<String?>(json['lastReviewedDate']),
+      consecutiveCorrectDays: serializer.fromJson<int>(
+        json['consecutiveCorrectDays'],
+      ),
+      masteredAt: serializer.fromJson<DateTime?>(json['masteredAt']),
     );
   }
   @override
@@ -3671,8 +3770,11 @@ class ReviewStateData extends DataClass implements Insertable<ReviewStateData> {
       'easiness': serializer.toJson<double>(easiness),
       'interval': serializer.toJson<int>(interval),
       'repetitions': serializer.toJson<int>(repetitions),
-      'dueDate': serializer.toJson<DateTime>(dueDate),
+      'dueDate': serializer.toJson<DateTime?>(dueDate),
       'lastReviewed': serializer.toJson<DateTime?>(lastReviewed),
+      'lastReviewedDate': serializer.toJson<String?>(lastReviewedDate),
+      'consecutiveCorrectDays': serializer.toJson<int>(consecutiveCorrectDays),
+      'masteredAt': serializer.toJson<DateTime?>(masteredAt),
     };
   }
 
@@ -3681,15 +3783,24 @@ class ReviewStateData extends DataClass implements Insertable<ReviewStateData> {
     double? easiness,
     int? interval,
     int? repetitions,
-    DateTime? dueDate,
+    Value<DateTime?> dueDate = const Value.absent(),
     Value<DateTime?> lastReviewed = const Value.absent(),
+    Value<String?> lastReviewedDate = const Value.absent(),
+    int? consecutiveCorrectDays,
+    Value<DateTime?> masteredAt = const Value.absent(),
   }) => ReviewStateData(
     itemId: itemId ?? this.itemId,
     easiness: easiness ?? this.easiness,
     interval: interval ?? this.interval,
     repetitions: repetitions ?? this.repetitions,
-    dueDate: dueDate ?? this.dueDate,
+    dueDate: dueDate.present ? dueDate.value : this.dueDate,
     lastReviewed: lastReviewed.present ? lastReviewed.value : this.lastReviewed,
+    lastReviewedDate: lastReviewedDate.present
+        ? lastReviewedDate.value
+        : this.lastReviewedDate,
+    consecutiveCorrectDays:
+        consecutiveCorrectDays ?? this.consecutiveCorrectDays,
+    masteredAt: masteredAt.present ? masteredAt.value : this.masteredAt,
   );
   ReviewStateData copyWithCompanion(ReviewStateCompanion data) {
     return ReviewStateData(
@@ -3703,6 +3814,15 @@ class ReviewStateData extends DataClass implements Insertable<ReviewStateData> {
       lastReviewed: data.lastReviewed.present
           ? data.lastReviewed.value
           : this.lastReviewed,
+      lastReviewedDate: data.lastReviewedDate.present
+          ? data.lastReviewedDate.value
+          : this.lastReviewedDate,
+      consecutiveCorrectDays: data.consecutiveCorrectDays.present
+          ? data.consecutiveCorrectDays.value
+          : this.consecutiveCorrectDays,
+      masteredAt: data.masteredAt.present
+          ? data.masteredAt.value
+          : this.masteredAt,
     );
   }
 
@@ -3714,7 +3834,10 @@ class ReviewStateData extends DataClass implements Insertable<ReviewStateData> {
           ..write('interval: $interval, ')
           ..write('repetitions: $repetitions, ')
           ..write('dueDate: $dueDate, ')
-          ..write('lastReviewed: $lastReviewed')
+          ..write('lastReviewed: $lastReviewed, ')
+          ..write('lastReviewedDate: $lastReviewedDate, ')
+          ..write('consecutiveCorrectDays: $consecutiveCorrectDays, ')
+          ..write('masteredAt: $masteredAt')
           ..write(')'))
         .toString();
   }
@@ -3727,6 +3850,9 @@ class ReviewStateData extends DataClass implements Insertable<ReviewStateData> {
     repetitions,
     dueDate,
     lastReviewed,
+    lastReviewedDate,
+    consecutiveCorrectDays,
+    masteredAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -3737,7 +3863,10 @@ class ReviewStateData extends DataClass implements Insertable<ReviewStateData> {
           other.interval == this.interval &&
           other.repetitions == this.repetitions &&
           other.dueDate == this.dueDate &&
-          other.lastReviewed == this.lastReviewed);
+          other.lastReviewed == this.lastReviewed &&
+          other.lastReviewedDate == this.lastReviewedDate &&
+          other.consecutiveCorrectDays == this.consecutiveCorrectDays &&
+          other.masteredAt == this.masteredAt);
 }
 
 class ReviewStateCompanion extends UpdateCompanion<ReviewStateData> {
@@ -3745,8 +3874,11 @@ class ReviewStateCompanion extends UpdateCompanion<ReviewStateData> {
   final Value<double> easiness;
   final Value<int> interval;
   final Value<int> repetitions;
-  final Value<DateTime> dueDate;
+  final Value<DateTime?> dueDate;
   final Value<DateTime?> lastReviewed;
+  final Value<String?> lastReviewedDate;
+  final Value<int> consecutiveCorrectDays;
+  final Value<DateTime?> masteredAt;
   final Value<int> rowid;
   const ReviewStateCompanion({
     this.itemId = const Value.absent(),
@@ -3755,6 +3887,9 @@ class ReviewStateCompanion extends UpdateCompanion<ReviewStateData> {
     this.repetitions = const Value.absent(),
     this.dueDate = const Value.absent(),
     this.lastReviewed = const Value.absent(),
+    this.lastReviewedDate = const Value.absent(),
+    this.consecutiveCorrectDays = const Value.absent(),
+    this.masteredAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ReviewStateCompanion.insert({
@@ -3762,11 +3897,13 @@ class ReviewStateCompanion extends UpdateCompanion<ReviewStateData> {
     this.easiness = const Value.absent(),
     this.interval = const Value.absent(),
     this.repetitions = const Value.absent(),
-    required DateTime dueDate,
+    this.dueDate = const Value.absent(),
     this.lastReviewed = const Value.absent(),
+    this.lastReviewedDate = const Value.absent(),
+    this.consecutiveCorrectDays = const Value.absent(),
+    this.masteredAt = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : itemId = Value(itemId),
-       dueDate = Value(dueDate);
+  }) : itemId = Value(itemId);
   static Insertable<ReviewStateData> custom({
     Expression<String>? itemId,
     Expression<double>? easiness,
@@ -3774,6 +3911,9 @@ class ReviewStateCompanion extends UpdateCompanion<ReviewStateData> {
     Expression<int>? repetitions,
     Expression<DateTime>? dueDate,
     Expression<DateTime>? lastReviewed,
+    Expression<String>? lastReviewedDate,
+    Expression<int>? consecutiveCorrectDays,
+    Expression<DateTime>? masteredAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3783,6 +3923,10 @@ class ReviewStateCompanion extends UpdateCompanion<ReviewStateData> {
       if (repetitions != null) 'repetitions': repetitions,
       if (dueDate != null) 'due_date': dueDate,
       if (lastReviewed != null) 'last_reviewed': lastReviewed,
+      if (lastReviewedDate != null) 'last_reviewed_date': lastReviewedDate,
+      if (consecutiveCorrectDays != null)
+        'consecutive_correct_days': consecutiveCorrectDays,
+      if (masteredAt != null) 'mastered_at': masteredAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3792,8 +3936,11 @@ class ReviewStateCompanion extends UpdateCompanion<ReviewStateData> {
     Value<double>? easiness,
     Value<int>? interval,
     Value<int>? repetitions,
-    Value<DateTime>? dueDate,
+    Value<DateTime?>? dueDate,
     Value<DateTime?>? lastReviewed,
+    Value<String?>? lastReviewedDate,
+    Value<int>? consecutiveCorrectDays,
+    Value<DateTime?>? masteredAt,
     Value<int>? rowid,
   }) {
     return ReviewStateCompanion(
@@ -3803,6 +3950,10 @@ class ReviewStateCompanion extends UpdateCompanion<ReviewStateData> {
       repetitions: repetitions ?? this.repetitions,
       dueDate: dueDate ?? this.dueDate,
       lastReviewed: lastReviewed ?? this.lastReviewed,
+      lastReviewedDate: lastReviewedDate ?? this.lastReviewedDate,
+      consecutiveCorrectDays:
+          consecutiveCorrectDays ?? this.consecutiveCorrectDays,
+      masteredAt: masteredAt ?? this.masteredAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3828,6 +3979,17 @@ class ReviewStateCompanion extends UpdateCompanion<ReviewStateData> {
     if (lastReviewed.present) {
       map['last_reviewed'] = Variable<DateTime>(lastReviewed.value);
     }
+    if (lastReviewedDate.present) {
+      map['last_reviewed_date'] = Variable<String>(lastReviewedDate.value);
+    }
+    if (consecutiveCorrectDays.present) {
+      map['consecutive_correct_days'] = Variable<int>(
+        consecutiveCorrectDays.value,
+      );
+    }
+    if (masteredAt.present) {
+      map['mastered_at'] = Variable<DateTime>(masteredAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3843,6 +4005,9 @@ class ReviewStateCompanion extends UpdateCompanion<ReviewStateData> {
           ..write('repetitions: $repetitions, ')
           ..write('dueDate: $dueDate, ')
           ..write('lastReviewed: $lastReviewed, ')
+          ..write('lastReviewedDate: $lastReviewedDate, ')
+          ..write('consecutiveCorrectDays: $consecutiveCorrectDays, ')
+          ..write('masteredAt: $masteredAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -9027,8 +9192,11 @@ typedef $$ReviewStateTableCreateCompanionBuilder =
       Value<double> easiness,
       Value<int> interval,
       Value<int> repetitions,
-      required DateTime dueDate,
+      Value<DateTime?> dueDate,
       Value<DateTime?> lastReviewed,
+      Value<String?> lastReviewedDate,
+      Value<int> consecutiveCorrectDays,
+      Value<DateTime?> masteredAt,
       Value<int> rowid,
     });
 typedef $$ReviewStateTableUpdateCompanionBuilder =
@@ -9037,8 +9205,11 @@ typedef $$ReviewStateTableUpdateCompanionBuilder =
       Value<double> easiness,
       Value<int> interval,
       Value<int> repetitions,
-      Value<DateTime> dueDate,
+      Value<DateTime?> dueDate,
       Value<DateTime?> lastReviewed,
+      Value<String?> lastReviewedDate,
+      Value<int> consecutiveCorrectDays,
+      Value<DateTime?> masteredAt,
       Value<int> rowid,
     });
 
@@ -9096,6 +9267,21 @@ class $$ReviewStateTableFilterComposer
 
   ColumnFilters<DateTime> get lastReviewed => $composableBuilder(
     column: $table.lastReviewed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastReviewedDate => $composableBuilder(
+    column: $table.lastReviewedDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get consecutiveCorrectDays => $composableBuilder(
+    column: $table.consecutiveCorrectDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get masteredAt => $composableBuilder(
+    column: $table.masteredAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9157,6 +9343,21 @@ class $$ReviewStateTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get lastReviewedDate => $composableBuilder(
+    column: $table.lastReviewedDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get consecutiveCorrectDays => $composableBuilder(
+    column: $table.consecutiveCorrectDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get masteredAt => $composableBuilder(
+    column: $table.masteredAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ItemsTableOrderingComposer get itemId {
     final $$ItemsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -9206,6 +9407,21 @@ class $$ReviewStateTableAnnotationComposer
 
   GeneratedColumn<DateTime> get lastReviewed => $composableBuilder(
     column: $table.lastReviewed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastReviewedDate => $composableBuilder(
+    column: $table.lastReviewedDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get consecutiveCorrectDays => $composableBuilder(
+    column: $table.consecutiveCorrectDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get masteredAt => $composableBuilder(
+    column: $table.masteredAt,
     builder: (column) => column,
   );
 
@@ -9265,8 +9481,11 @@ class $$ReviewStateTableTableManager
                 Value<double> easiness = const Value.absent(),
                 Value<int> interval = const Value.absent(),
                 Value<int> repetitions = const Value.absent(),
-                Value<DateTime> dueDate = const Value.absent(),
+                Value<DateTime?> dueDate = const Value.absent(),
                 Value<DateTime?> lastReviewed = const Value.absent(),
+                Value<String?> lastReviewedDate = const Value.absent(),
+                Value<int> consecutiveCorrectDays = const Value.absent(),
+                Value<DateTime?> masteredAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ReviewStateCompanion(
                 itemId: itemId,
@@ -9275,6 +9494,9 @@ class $$ReviewStateTableTableManager
                 repetitions: repetitions,
                 dueDate: dueDate,
                 lastReviewed: lastReviewed,
+                lastReviewedDate: lastReviewedDate,
+                consecutiveCorrectDays: consecutiveCorrectDays,
+                masteredAt: masteredAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -9283,8 +9505,11 @@ class $$ReviewStateTableTableManager
                 Value<double> easiness = const Value.absent(),
                 Value<int> interval = const Value.absent(),
                 Value<int> repetitions = const Value.absent(),
-                required DateTime dueDate,
+                Value<DateTime?> dueDate = const Value.absent(),
                 Value<DateTime?> lastReviewed = const Value.absent(),
+                Value<String?> lastReviewedDate = const Value.absent(),
+                Value<int> consecutiveCorrectDays = const Value.absent(),
+                Value<DateTime?> masteredAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ReviewStateCompanion.insert(
                 itemId: itemId,
@@ -9293,6 +9518,9 @@ class $$ReviewStateTableTableManager
                 repetitions: repetitions,
                 dueDate: dueDate,
                 lastReviewed: lastReviewed,
+                lastReviewedDate: lastReviewedDate,
+                consecutiveCorrectDays: consecutiveCorrectDays,
+                masteredAt: masteredAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

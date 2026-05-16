@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../core/database/database.dart';
 import '../../core/database/providers.dart';
 import '../../core/sm2/sm2.dart';
@@ -26,6 +25,9 @@ class ReviewExerciseStep {
     required this.reviewEasiness,
     required this.reviewInterval,
     required this.reviewRepetitions,
+    required this.consecutiveCorrectDays,
+    required this.lastReviewedDate,
+    required this.masteredAt,
     required this.vocab,
     required this.showItaliano,
     required this.options,
@@ -34,6 +36,9 @@ class ReviewExerciseStep {
   final double reviewEasiness;
   final int reviewInterval;
   final int reviewRepetitions;
+  final int consecutiveCorrectDays;
+  final String? lastReviewedDate;
+  final DateTime? masteredAt;
   final VocabStepData vocab;
   final bool showItaliano;
   final List<McOption> options;
@@ -49,6 +54,8 @@ class ReviewSessionState {
     required this.currentIndex,
     required this.results,
     required this.selectedOption,
+    required this.retryQueue,
+    required this.retryCount,
     this.error,
   });
 
@@ -58,6 +65,8 @@ class ReviewSessionState {
         currentIndex: 0,
         results: {},
         selectedOption: null,
+        retryQueue: [],
+        retryCount: {},
       );
 
   final ReviewPhase phase;
@@ -65,9 +74,28 @@ class ReviewSessionState {
   final int currentIndex;
   final Map<int, bool> results;
   final int? selectedOption;
+
+  /// Items die heute falsch waren — werden nach der Hauptqueue wiederholt.
+  final List<ReviewExerciseStep> retryQueue;
+
+  /// itemId → wie oft heute in die retryQueue gewandert (max 3).
+  final Map<String, int> retryCount;
+
   final String? error;
 
   bool get isAnswered => selectedOption != null;
+
+  bool get isInRetryPhase => currentIndex >= steps.length;
+
+  ReviewExerciseStep? get currentStep {
+    if (isInRetryPhase) {
+      final retryIndex = currentIndex - steps.length;
+      if (retryIndex < retryQueue.length) return retryQueue[retryIndex];
+      return null;
+    }
+    if (currentIndex < steps.length) return steps[currentIndex];
+    return null;
+  }
 
   ReviewSessionState copyWith({
     ReviewPhase? phase,
@@ -76,6 +104,8 @@ class ReviewSessionState {
     Map<int, bool>? results,
     int? selectedOption,
     bool clearSelected = false,
+    List<ReviewExerciseStep>? retryQueue,
+    Map<String, int>? retryCount,
     String? error,
   }) =>
       ReviewSessionState(
@@ -85,15 +115,23 @@ class ReviewSessionState {
         results: results ?? this.results,
         selectedOption:
             clearSelected ? null : (selectedOption ?? this.selectedOption),
+        retryQueue: retryQueue ?? this.retryQueue,
+        retryCount: retryCount ?? this.retryCount,
         error: error ?? this.error,
       );
 }
 
 // ── Notifier ──────────────────────────────────────────────────────────────────
 
-class ReviewSessionNotifier
-    extends Notifier<ReviewSessionState> {
+const _maxRetriesPerItem = 3;
+
+class ReviewSessionNotifier extends Notifier<ReviewSessionState> {
   final _rng = Random();
+
+  String get _today {
+    final d = DateTime.now();
+    return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  }
 
   @override
   ReviewSessionState build() {
@@ -105,30 +143,39 @@ class ReviewSessionNotifier
     try {
       final db = ref.read(appDatabaseProvider);
       final now = DateTime.now();
+      final today = _today;
 
-      // Load all review states, filter due items in Dart
       final allStates = await db.select(db.reviewState).get();
-      final dueStates =
-          allStates.where((r) => !r.dueDate.isAfter(now)).toList();
+
+      final dueStates = allStates.where((r) {
+        if (r.masteredAt == null) {
+          // Phase 1: täglich bis Mastery — fällig wenn heute noch nicht gemacht
+          return r.lastReviewedDate != today;
+        } else {
+          // Phase 2: SM-2 Langzeit
+          return r.dueDate != null && !r.dueDate!.isAfter(now);
+        }
+      }).toList();
 
       if (dueStates.isEmpty) {
         state = state.copyWith(phase: ReviewPhase.done);
         return;
       }
 
-      // Load all vocab + translations for matching and distractors
       final allVocabItems = await db.select(db.vocabItems).get();
       final allTrans = await db.select(db.itemTranslations).get();
       final transDE = allTrans.where((t) => t.lang == 'de').toList();
       final vocabMap = {for (final v in allVocabItems) v.itemId: v};
       final transMap = {for (final t in transDE) t.itemId: t.translation};
 
-      final allVocab = allVocabItems.map((v) => VocabStepData(
-            itemId: v.itemId,
-            italiano: v.front,
-            translationDe: transMap[v.itemId] ?? '',
-            partOfSpeech: v.partOfSpeech,
-          )).toList();
+      final allVocab = allVocabItems
+          .map((v) => VocabStepData(
+                itemId: v.itemId,
+                italiano: v.front,
+                translationDe: transMap[v.itemId] ?? '',
+                partOfSpeech: v.partOfSpeech,
+              ))
+          .toList();
 
       final steps = <ReviewExerciseStep>[];
       for (final rs in dueStates) {
@@ -146,6 +193,9 @@ class ReviewSessionNotifier
           reviewEasiness: rs.easiness,
           reviewInterval: rs.interval,
           reviewRepetitions: rs.repetitions,
+          consecutiveCorrectDays: rs.consecutiveCorrectDays,
+          lastReviewedDate: rs.lastReviewedDate,
+          masteredAt: rs.masteredAt,
           vocab: vocab,
           showItaliano: showIT,
           options: options,
@@ -184,42 +234,148 @@ class ReviewSessionNotifier
 
   void advance() {
     if (!state.isAnswered) return;
-    final step = state.steps[state.currentIndex];
+
+    final step = state.currentStep!;
     final correct = step.options[state.selectedOption!].isCorrect;
+
     final newResults = Map<int, bool>.from(state.results);
     newResults[state.currentIndex] = correct;
 
-    _applySm2(step, correct);
+    _applyResult(step, correct);
+
+    var newRetryQueue = List<ReviewExerciseStep>.from(state.retryQueue);
+    var newRetryCount = Map<String, int>.from(state.retryCount);
+
+    if (!correct) {
+      // Falsch: in retryQueue wenn Limit nicht erreicht
+      final count = newRetryCount[step.itemId] ?? 0;
+      if (count < _maxRetriesPerItem) {
+        newRetryQueue.add(step);
+        newRetryCount[step.itemId] = count + 1;
+      }
+    }
 
     final next = state.currentIndex + 1;
-    if (next >= state.steps.length) {
+    final totalAvailable = state.steps.length + newRetryQueue.length;
+
+    if (next >= totalAvailable) {
       state = state.copyWith(
-          phase: ReviewPhase.done, results: newResults, clearSelected: true);
-      _recordActivity(state.steps.length);
+        phase: ReviewPhase.done,
+        results: newResults,
+        retryQueue: newRetryQueue,
+        retryCount: newRetryCount,
+        clearSelected: true,
+      );
+      _recordActivity(state.steps.length + state.retryQueue.length);
     } else {
       state = state.copyWith(
-          currentIndex: next, results: newResults, clearSelected: true);
+        currentIndex: next,
+        results: newResults,
+        retryQueue: newRetryQueue,
+        retryCount: newRetryCount,
+        clearSelected: true,
+      );
     }
   }
 
-  Future<void> _applySm2(ReviewExerciseStep step, bool correct) async {
+  Future<void> _applyResult(ReviewExerciseStep step, bool correct) async {
     final db = ref.read(appDatabaseProvider);
-    final sm2 = SM2.apply(
-      easiness: step.reviewEasiness,
-      interval: step.reviewInterval,
-      repetitions: step.reviewRepetitions,
-      correct: correct,
-    );
-    await db.into(db.reviewState).insertOnConflictUpdate(
-          ReviewStateCompanion.insert(
-            itemId: step.itemId,
-            easiness: Value(sm2.easiness),
-            interval: Value(sm2.interval),
-            repetitions: Value(sm2.repetitions),
-            dueDate: sm2.dueDate,
-            lastReviewed: Value(DateTime.now()),
-          ),
+    final today = _today;
+    final now = DateTime.now();
+
+    final isPhase2 = step.masteredAt != null;
+
+    if (isPhase2) {
+      if (!correct) {
+        // Falsch in Phase 2 → zurück in Phase 1
+        await db.into(db.reviewState).insertOnConflictUpdate(
+              ReviewStateCompanion.insert(
+                itemId: step.itemId,
+                easiness: Value(step.reviewEasiness),
+                interval: Value(step.reviewInterval),
+                repetitions: Value(step.reviewRepetitions),
+                consecutiveCorrectDays: const Value(0),
+                lastReviewedDate: const Value(null),
+                masteredAt: const Value(null),
+                dueDate: const Value(null),
+                lastReviewed: Value(now),
+              ),
+            );
+      } else {
+        // Richtig in Phase 2 → SM-2 weiter
+        final sm2 = SM2.apply(
+          easiness: step.reviewEasiness,
+          interval: step.reviewInterval,
+          repetitions: step.reviewRepetitions,
+          correct: true,
         );
+        await db.into(db.reviewState).insertOnConflictUpdate(
+              ReviewStateCompanion.insert(
+                itemId: step.itemId,
+                easiness: Value(sm2.easiness),
+                interval: Value(sm2.interval),
+                repetitions: Value(sm2.repetitions),
+                consecutiveCorrectDays:
+                    Value(step.consecutiveCorrectDays),
+                lastReviewedDate: Value(today),
+                masteredAt: Value(step.masteredAt),
+                dueDate: Value(sm2.dueDate),
+                lastReviewed: Value(now),
+              ),
+            );
+      }
+      return;
+    }
+
+    // Phase 1
+    if (!correct) {
+      // Streak reset; lastReviewedDate NICHT updaten → Item bleibt heute fällig
+      await (db.update(db.reviewState)
+            ..where((r) => r.itemId.equals(step.itemId)))
+          .write(ReviewStateCompanion(
+        consecutiveCorrectDays: const Value(0),
+        lastReviewed: Value(now),
+      ));
+      return;
+    }
+
+    // Richtig in Phase 1
+    // Retry (in retryCount) = Same-Day → streak nicht erhöhen
+    final isRetry = (state.retryCount[step.itemId] ?? 0) > 0;
+    final newStreak =
+        isRetry ? step.consecutiveCorrectDays : step.consecutiveCorrectDays + 1;
+
+    if (newStreak >= 3) {
+      // Mastery erreicht → SM-2 starten
+      final sm2 = SM2.applyAfterMastery(easiness: step.reviewEasiness);
+      await db.into(db.reviewState).insertOnConflictUpdate(
+            ReviewStateCompanion.insert(
+              itemId: step.itemId,
+              easiness: Value(sm2.easiness),
+              interval: Value(sm2.interval),
+              repetitions: Value(sm2.repetitions),
+              consecutiveCorrectDays: Value(newStreak),
+              lastReviewedDate: Value(today),
+              masteredAt: Value(now),
+              dueDate: Value(sm2.dueDate),
+              lastReviewed: Value(now),
+            ),
+          );
+    } else {
+      await db.into(db.reviewState).insertOnConflictUpdate(
+            ReviewStateCompanion.insert(
+              itemId: step.itemId,
+              easiness: Value(step.reviewEasiness),
+              interval: Value(step.reviewInterval),
+              repetitions: Value(step.reviewRepetitions),
+              consecutiveCorrectDays: Value(newStreak),
+              lastReviewedDate: Value(today),
+              masteredAt: const Value(null),
+              dueDate: const Value(null),
+              lastReviewed: Value(now),
+            ),
+          );
+    }
   }
 
   Future<void> _recordActivity(int count) async {

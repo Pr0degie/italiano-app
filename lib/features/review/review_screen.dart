@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/audio/audio_service.dart';
+import '../../core/widgets/multiple_choice_widget.dart';
 import 'review_session_notifier.dart';
 
 class ReviewScreen extends ConsumerWidget {
@@ -26,7 +28,7 @@ class _ReviewDoneScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final hadItems = session.steps.isNotEmpty;
     final correct = session.results.values.where((v) => v).length;
-    final total = session.steps.length;
+    final total = session.results.length;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Wiederholen')),
@@ -47,9 +49,11 @@ class _ReviewDoneScreen extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyLarge),
               ] else ...[
                 const SizedBox(height: 8),
-                Text('Mach zuerst ein paar Lektionen,\ndann kommen Items hierher.',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center),
+                Text(
+                  'Mach zuerst ein paar Lektionen,\ndann kommen Items hierher.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
               ],
             ],
           ),
@@ -65,123 +69,92 @@ class _ReviewExerciseScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final step = session.steps[session.currentIndex];
-    final total = session.steps.length;
-    final current = session.currentIndex + 1;
-    final notifier = ref.read(reviewSessionProvider.notifier);
+    final step = session.currentStep;
+    if (step == null) return const SizedBox.shrink();
 
-    final questionText = step.showItaliano
-        ? step.vocab.italiano
-        : step.vocab.translationDe;
+    final notifier = ref.read(reviewSessionProvider.notifier);
+    final totalSteps = session.steps.length + session.retryQueue.length;
+    final current = session.currentIndex + 1;
+
+    final isRetry = session.isInRetryPhase;
+    final questionText =
+        step.showItaliano ? step.vocab.italiano : step.vocab.translationDe;
     final questionLabel = step.showItaliano
         ? 'Wie heißt auf Deutsch?'
         : 'Wie heißt auf Italienisch?';
 
+    final options = step.options.map((o) => o.text).toList();
+    final correct = step.options.firstWhere((o) => o.isCorrect).text;
+    final selected = session.selectedOption != null
+        ? step.options[session.selectedOption!].text
+        : null;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Wiederholen $current/$total'),
+        title: Text(isRetry
+            ? 'Wiederholen – nochmal'
+            : 'Wiederholen $current/$totalSteps'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4),
-          child: LinearProgressIndicator(value: current / total),
+          child: LinearProgressIndicator(value: current / totalSteps),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Spacer(),
-            Text(questionLabel,
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: session.isAnswered ? notifier.advance : null,
+        child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Spacer(),
+              Text(
+                questionLabel,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: Theme.of(context)
                         .colorScheme
                         .onSurface
                         .withOpacity(0.5)),
-                textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            Text(questionText,
-                style: Theme.of(context)
-                    .textTheme
-                    .displaySmall
-                    ?.copyWith(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center),
-            const Spacer(),
-            ...step.options.asMap().entries.map((e) => _OptionTile(
-                  text: e.value.text,
-                  isCorrect: e.value.isCorrect,
-                  isSelected: session.selectedOption == e.key,
-                  isAnswered: session.isAnswered,
-                  onTap: session.isAnswered
-                      ? null
-                      : () => notifier.selectOption(e.key),
-                )),
-            const SizedBox(height: 16),
-            if (session.isAnswered)
-              FilledButton(
-                onPressed: notifier.advance,
-                style: FilledButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 52)),
-                child: Text(current == total ? 'Fertig' : 'Weiter'),
+                textAlign: TextAlign.center,
               ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _OptionTile extends StatelessWidget {
-  const _OptionTile({
-    required this.text,
-    required this.isCorrect,
-    required this.isSelected,
-    required this.isAnswered,
-    this.onTap,
-  });
-  final String text;
-  final bool isCorrect;
-  final bool isSelected;
-  final bool isAnswered;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    Color? bgColor;
-    Color? borderColor;
-    IconData? trailingIcon;
-    if (isAnswered) {
-      if (isCorrect) {
-        bgColor = Colors.green.withOpacity(0.15);
-        borderColor = Colors.green;
-        trailingIcon = Icons.check;
-      } else if (isSelected) {
-        bgColor = Colors.red.withOpacity(0.15);
-        borderColor = Colors.red;
-        trailingIcon = Icons.close;
-      }
-    }
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: bgColor,
-            border: Border.all(
-              color: borderColor ??
-                  Theme.of(context).colorScheme.outline.withOpacity(0.4),
-            ),
-            borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onLongPress: () =>
+                    ref.read(audioServiceProvider).speak(step.vocab.italiano),
+                child: Text(
+                  questionText,
+                  style: Theme.of(context)
+                      .textTheme
+                      .displaySmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const Spacer(),
+              MultipleChoiceWidget(
+                options: options,
+                correct: correct,
+                selected: selected,
+                onSelect: (text) {
+                  final idx = step.options.indexWhere((o) => o.text == text);
+                  if (idx != -1) notifier.selectOption(idx);
+                },
+              ),
+              const SizedBox(height: 16),
+              if (session.isAnswered)
+                Text(
+                  'Tippen zum Weitergehen',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.4)),
+                ),
+            ],
           ),
-          child: Row(children: [
-            Expanded(child: Text(text,
-                style: Theme.of(context).textTheme.bodyLarge)),
-            if (trailingIcon != null)
-              Icon(trailingIcon,
-                  color: isCorrect ? Colors.green : Colors.red),
-          ]),
+        ),
         ),
       ),
     );

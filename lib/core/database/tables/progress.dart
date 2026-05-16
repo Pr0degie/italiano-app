@@ -9,8 +9,15 @@ class ReviewState extends Table {
   RealColumn get easiness => real().withDefault(const Constant(2.5))();
   IntColumn get interval => integer().withDefault(const Constant(0))();
   IntColumn get repetitions => integer().withDefault(const Constant(0))();
-  DateTimeColumn get dueDate => dateTime()();
+  DateTimeColumn get dueDate => dateTime().nullable()();
   DateTimeColumn get lastReviewed => dateTime().nullable()();
+
+  // Phase-1: Daily-Drill bis Mastery
+  TextColumn get lastReviewedDate => text().nullable()(); // 'YYYY-MM-DD'
+  IntColumn get consecutiveCorrectDays =>
+      integer().withDefault(const Constant(0))();
+  // Phase-2: SM-2 Langzeit
+  DateTimeColumn get masteredAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {itemId};

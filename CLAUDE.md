@@ -112,9 +112,22 @@ Flutter-Projekt, pubspec, Ordnerstruktur, Drift-DB mit vollem Schema, build_runn
     - Drag: Pool→Slot, Slot→Slot (swap), Slot→Pool; Hover-Highlight
     - Layout: Satz oben, Slots+Pool unten (einhändige Bedienung); `SafeArea` gegen Navigationsleiste
     - Satz-Daten in `sentence_exercises.dart` (in-memory, 3 Sätze je Lektion für chapter.01)
-- Review-Session: fällige Items per SM-2, MC bidirektional (IT→DE / DE→IT)
+- Review-Session: fällige Items, MC bidirektional (IT→DE / DE→IT), `MultipleChoiceWidget`
 - SM-2-Algorithmus in `core/sm2/sm2.dart`
 - `LessonProgress` + `DailyActivity` werden nach jeder Session geschrieben
+
+#### Wiederholungsmodell (zweiphasig)
+
+**Phase 1 – Daily Drill** (`masteredAt == null`):
+- Täglich fällig wenn `lastReviewedDate != today`
+- Richtig → `consecutiveCorrectDays + 1`, morgen wieder; bei == 3 → Mastery
+- Falsch → Streak = 0, `lastReviewedDate` bleibt leer (heute nochmal fällig), retry queue (max 3×/Session)
+
+**Phase 2 – SM-2 Langzeit** (`masteredAt != null`):
+- Fälligkeit über `dueDate`, Startintervall 7 Tage nach Mastery
+- Falsch → zurück in Phase 1 (`masteredAt = null`, `consecutiveCorrectDays = 0`)
+
+Felder in `ReviewState`: `consecutiveCorrectDays`, `lastReviewedDate`, `masteredAt`, `dueDate` (nullable).
 
 ### 🔜 Stufe 2 — Weitere Übungstypen + Content-Pipeline
 - JSON-Content-Loader: `assets/content/manifest.json` → Seeder ersetzt Dummy-Daten

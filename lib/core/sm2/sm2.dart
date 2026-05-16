@@ -14,6 +14,17 @@ class SM2Result {
 /// Standard SM-2 Algorithmus.
 /// [correct] true → Qualität 4, false → Qualität 1.
 class SM2 {
+  /// Einstieg nach Phase-1-Mastery (3 Tage korrekt).
+  /// Startet mit interval=7 statt 1 — Phase 1 hat das bereits abgedeckt.
+  static SM2Result applyAfterMastery({required double easiness}) {
+    return apply(
+      easiness: easiness,
+      interval: 7,
+      repetitions: 3,
+      correct: true,
+    );
+  }
+
   static SM2Result apply({
     required double easiness,
     required int interval,

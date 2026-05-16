@@ -188,7 +188,7 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
                 easiness: Value(sm2.easiness),
                 interval: Value(sm2.interval),
                 repetitions: Value(sm2.repetitions),
-                dueDate: sm2.dueDate,
+                dueDate: Value(sm2.dueDate),
                 lastReviewed: Value(now),
               ),
             );
