@@ -1,17 +1,27 @@
-# italiano_app
+# italiano-app
 
-A new Flutter project.
+Flutter-basierte Sprachlern-App für Italienisch mit SM-2-basierter Wiederholung.
 
-## Getting Started
+## Stack
 
-This project is a starting point for a Flutter application.
+Flutter 3.x · Riverpod 3.x · Drift 2.x · drift_flutter
 
-A few resources to get you started if this is your first Flutter project:
+## Setup
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```bash
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
+flutter run
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+> App läuft auf Android (S25+ per USB). Nach Schema- oder Provider-Änderungen build_runner neu ausführen.
+
+## Struktur
+
+```
+lib/
+  core/        # DB, Provider, SM-2, Widgets
+  features/    # home, lesson, review
+```
+
+Siehe `CLAUDE.md` für vollständige Projektdokumentation.
