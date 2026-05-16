@@ -58,6 +58,7 @@ web/
 
 # Local dev files
 dashboard.html
+.claude/settings.local.json
 
 # Dart build_runner output
 *.g.dart
