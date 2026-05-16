@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/widgets/multiple_choice_widget.dart';
 import '../../core/widgets/flash_card.dart';
+import '../../core/widgets/sentence_builder_widget.dart';
 import '../home/home_providers.dart';
 import 'lesson_session_notifier.dart';
 
@@ -105,12 +106,12 @@ class _IntroScreenState extends ConsumerState<_IntroScreen> {
                           ?.copyWith(fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center),
                   if (step.partOfSpeech != null) ...[
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 14),
                     Text(step.partOfSpeech!,
                         style: TextStyle(
                             color: cs.onSurface.withOpacity(0.45),
                             fontSize: 13)),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 14),
                   ] else
                     const SizedBox(height: 24),
                   Text(step.translationDe,
@@ -126,33 +127,70 @@ class _IntroScreenState extends ConsumerState<_IntroScreen> {
   }
 }
 
-// ── Exercise (Multiple Choice) ────────────────────────────────────────────────
+// ── Exercise Router ───────────────────────────────────────────────────────────
 
-class _ExerciseScreen extends ConsumerStatefulWidget {
+class _ExerciseScreen extends ConsumerWidget {
   const _ExerciseScreen({required this.lessonId, required this.session});
   final String lessonId;
   final LessonSessionState session;
 
   @override
-  ConsumerState<_ExerciseScreen> createState() => _ExerciseScreenState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final total = session.exerciseSteps.length;
+    final current = session.currentIndex + 1;
+    final step = session.exerciseSteps[session.currentIndex];
+    final notifier = ref.read(lessonSessionProvider(lessonId).notifier);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Übung $current/$total'),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(4),
+          child: LinearProgressIndicator(value: current / total),
+        ),
+      ),
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: switch (step) {
+            MCExerciseStep s => _MCExerciseBody(
+                key: ValueKey('mc-${session.currentIndex}'),
+                step: s,
+                onAnswer: notifier.answerExercise,
+              ),
+            SentenceBuilderStep s => SentenceBuilderWidget(
+                key: ValueKey('sb-${session.currentIndex}'),
+                germanSentence: s.german,
+                italianWords: s.italianWords,
+                onComplete: notifier.answerExercise,
+              ),
+          },
+        ),
+      ),
+    );
+  }
 }
 
-class _ExerciseScreenState extends ConsumerState<_ExerciseScreen> {
+// ── MC Exercise Body ──────────────────────────────────────────────────────────
+
+class _MCExerciseBody extends StatefulWidget {
+  const _MCExerciseBody({super.key, required this.step, required this.onAnswer});
+  final MCExerciseStep step;
+  final void Function(bool correct) onAnswer;
+
+  @override
+  State<_MCExerciseBody> createState() => _MCExerciseBodyState();
+}
+
+class _MCExerciseBodyState extends State<_MCExerciseBody> {
   final _cardCtrl = FlashCardController();
 
   String? _selected;
   bool _isCorrect = false;
   bool _flipping = false;
   Color? _cardColor;
-  LessonSessionNotifier? _pendingNotifier;
-
-  @override
-  void didUpdateWidget(_ExerciseScreen old) {
-    super.didUpdateWidget(old);
-    if (!_flipping && old.session.currentIndex != widget.session.currentIndex) {
-      setState(() => _selected = null);
-    }
-  }
+  bool _pendingAnswer = false;
 
   @override
   void dispose() {
@@ -160,11 +198,10 @@ class _ExerciseScreenState extends ConsumerState<_ExerciseScreen> {
     super.dispose();
   }
 
-  void _onSelect(
-      String option, String correct, LessonSessionNotifier notifier) {
+  void _onSelect(String option, String correct) {
     if (_selected != null) return;
     _isCorrect = option == correct;
-    _pendingNotifier = notifier;
+    _pendingAnswer = true;
     setState(() {
       _selected = option;
       _cardColor = _isCorrect ? Colors.green[600] : Colors.red[600];
@@ -179,63 +216,53 @@ class _ExerciseScreenState extends ConsumerState<_ExerciseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final session = widget.session;
-    final step = session.exerciseSteps[session.currentIndex];
-    final total = session.exerciseSteps.length;
-    final current = session.currentIndex + 1;
-    final notifier = ref.read(lessonSessionProvider(widget.lessonId).notifier);
+    final step = widget.step;
     final correct = step.vocab.translationDe;
-    final wordWidget = Text(step.vocab.italiano,
-        style: Theme.of(context)
-            .textTheme
-            .displaySmall
-            ?.copyWith(fontWeight: FontWeight.bold),
-        textAlign: TextAlign.center);
+    final wordWidget = Text(
+      step.vocab.italiano,
+      style: Theme.of(context)
+          .textTheme
+          .displaySmall
+          ?.copyWith(fontWeight: FontWeight.bold),
+      textAlign: TextAlign.center,
+    );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Übung $current/$total'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4),
-          child: LinearProgressIndicator(value: current / total),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        FlashCard(
+          controller: _cardCtrl,
+          color: _cardColor,
+          minHeight: 140,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
+          front: Center(child: wordWidget),
+          back: Center(child: wordWidget),
+          onFlipMidpoint: () {
+            if (!_pendingAnswer) return;
+            _pendingAnswer = false;
+            final wasCorrect = _isCorrect;
+            setState(() {
+              _cardColor = null;
+              _selected = null;
+            });
+            widget.onAnswer(wasCorrect);
+          },
+          onFlipComplete: () {
+            _cardCtrl.reset();
+            setState(() {
+              _flipping = false;
+              _selected = null;
+            });
+          },
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FlashCard(
-              controller: _cardCtrl,
-              color: _cardColor,
-              minHeight: 140,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
-              front: Center(child: wordWidget),
-              back: Center(child: wordWidget),
-              onFlipMidpoint: () {
-                final n = _pendingNotifier;
-                _pendingNotifier = null;
-                setState(() => _cardColor = null);
-                n?.answerFlashcard(_isCorrect);
-              },
-              onFlipComplete: () {
-                _cardCtrl.reset();
-                setState(() {
-                  _flipping = false;
-                  _selected = null;
-                });
-              },
-            ),
-            const SizedBox(height: 32),
-            MultipleChoiceWidget(
-              options: step.options,
-              correct: correct,
-              selected: _selected,
-              onSelect: (option) => _onSelect(option, correct, notifier),
-            ),
-          ],
+        const SizedBox(height: 32),
+        MultipleChoiceWidget(
+          options: step.options,
+          correct: correct,
+          selected: _selected,
+          onSelect: (option) => _onSelect(option, correct),
         ),
-      ),
+      ],
     );
   }
 }

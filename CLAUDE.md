@@ -33,13 +33,17 @@ lib/
         lessons.dart        # Lessons, LessonTranslations, LessonSteps
         progress.dart       # ReviewState, LessonProgress, DailyActivity
     seeding/
-      seeder.dart           # DB-Seeder (nur dev-Start, kein Prod-Pfad)
-      dummy_content.dart    # Seed-Daten (Ausnahme vom Anti-Pattern: Seeder-only)
+      seeder.dart              # DB-Seeder (nur dev-Start, kein Prod-Pfad)
+      dummy_content.dart       # Seed-Daten (Ausnahme vom Anti-Pattern: Seeder-only)
+      sentence_exercises.dart  # Satz-Bau-Übungen je Lektion (in-memory, kein DB)
+    audio/
+      audio_service.dart    # AudioService (abstract) + _NoOpAudioService + audioServiceProvider
     sm2/
       sm2.dart              # SM-2-Algorithmus
     widgets/
       multiple_choice_widget.dart
       flash_card.dart
+      sentence_builder_widget.dart  # Wort-Reihenfolge-Übung mit Drag & Drop
   features/
     home/                   # home_screen.dart, home_providers.dart
     lesson/                 # lesson_player_screen.dart, lesson_providers.dart,
@@ -55,6 +59,21 @@ Feature-Dateien sind **flach** (kein data/application/presentation-Split).
 - `AppConstants.activeLang` verwenden — Sprache nie hardcoden.
 - Drift-Tabellen in `lib/core/database/tables/`, nach Domäne gruppiert.
 - Code selbsterklärend; Kommentare nur wo nicht offensichtlich.
+
+## Audio / Long-Press-Vorlesen
+Jedes Widget das italienischen Text anzeigt, soll Long-Press zum Vorlesen unterstützen.
+Implementierung via `audioServiceProvider` (`core/audio/audio_service.dart`):
+
+```dart
+GestureDetector(
+  onLongPress: () => ref.read(audioServiceProvider).speak(italianoText),
+  child: Text(italianoText),
+)
+```
+
+Bis Stufe 4 ist der Provider ein No-Op (tut nichts). In Stufe 4 wird nur die
+Provider-Implementierung getauscht — alle Widgets bleiben unverändert.
+→ Bei neuen Widgets die IT-Text rendern: `onLongPress` von Anfang an verdrahten.
 
 ## Build
 Schema- oder Provider-Änderungen → build_runner:
@@ -77,31 +96,52 @@ Commit-Message vor `git commit` als Vorschlag zeigen.
 
 ## Projektstatus & Stufen
 
-### ✅ Stufe 0 — Foundation
+### ✅ Stufe 0 — Fundament
 Flutter-Projekt, pubspec, Ordnerstruktur, Drift-DB mit vollem Schema, build_runner-Setup.
 
-### ✅ Stufe 1 — Lesson-Player + Review
+### 🟡 Stufe 1 — Vokabel-Lektionen + Lektionsstruktur + Streak/Tagesziel
+**Fertig:**
 - DB-Schema komplett (Chapters → Lessons → LessonSteps → Items/Exercises, Progress, SM-2)
 - Seeder mit Dummy-Vokabeln
 - Home-Screen (Kapitel/Lektionen-Liste, Review-Badge, DailyActivity-Streak-Placeholder)
-- Lesson-Player: Intro-Phase (FlashCard) → Exercise-Phase (MC, 4 Optionen) → Done
+- Lesson-Player: Intro-Phase (FlashCard) → Exercise-Phase → Done
+- Exercise-Phase: gemischte Übungstypen via `sealed class AnyExerciseStep`
+  - `MCExerciseStep`: Multiple-Choice (4 Optionen, FlashCard-Flip-Feedback)
+  - `SentenceBuilderStep`: Wörter per Tap oder Drag & Drop in richtige Reihenfolge bringen
+    - Slots sized nach Zielwort (transparenter Platzhaltertext)
+    - Drag: Pool→Slot, Slot→Slot (swap), Slot→Pool; Hover-Highlight
+    - Layout: Satz oben, Slots+Pool unten (einhändige Bedienung); `SafeArea` gegen Navigationsleiste
+    - Satz-Daten in `sentence_exercises.dart` (in-memory, 3 Sätze je Lektion für chapter.01)
 - Review-Session: fällige Items per SM-2, MC bidirektional (IT→DE / DE→IT)
 - SM-2-Algorithmus in `core/sm2/sm2.dart`
 - `LessonProgress` + `DailyActivity` werden nach jeder Session geschrieben
 
-### 🔜 Stufe 2 — Content-Pipeline & Übungstypen
-Ziel: echte Inhalte aus JSON laden, weitere Übungstypen aktivieren.
-- JSON-Content-Loader: `assets/content/manifest.json` → Seeder ersetzt Dummy-Daten
-- Übungstypen: `pair` (Zuordnung), `typing` (Freitext), `listening` (Audio-MC)
-- `Items.audioRef` verdrahten (lokale Asset-Dateien oder TTS)
-- `LessonSteps.suggestedExerciseType` auswerten im Player
-
-### 🔜 Stufe 3 — Statistiken & Daily Goal
+**Ausstehend:**
 - DailyActivity-UI: Streak-Anzeige, Tages-Ziel (`AppConstants.dailyGoalItems`)
 - Fortschrittsbalken pro Kapitel auf Home-Screen
-- Einfache Stats-Seite (Items gelernt, Wiederholungen, Erfolgsquote)
 
-### 🔜 Stufe 4 — Mehrsprachigkeit & Release
-- UI-Sprache via `AppConstants.activeLang` vollständig entkoppelt
+### 🔜 Stufe 2 — Weitere Übungstypen + Content-Pipeline
+- JSON-Content-Loader: `assets/content/manifest.json` → Seeder ersetzt Dummy-Daten
+- `LessonSteps.suggestedExerciseType` im Player auswerten
+- Übungstyp `pair` (Zuordnung: Wort↔Übersetzung per Drag oder Tap)
+- Übungstyp `typing` (Freitext-Eingabe mit Toleranz für Tippfehler)
+- Satz-Übungen aus JSON statt Hardcode (`sentence_exercises.dart` entfällt)
+- Stats-Seite: Items gelernt, Wiederholungen, Erfolgsquote
+
+### 🔜 Stufe 3 — Grammatik-Lektionen + Grammatik-Übungen
+- Neuer Lektionstyp `grammar` neben `vocab`
+- DB-Erweiterung: Grammatikregeln, Beispielsätze, Ausnahmen
+- Grammatik-spezifische Übungstypen (z. B. Lückentext, Konjugationstabelle)
+
+### 🔜 Stufe 4 — Hörverstehen (Audio)
+- `audioServiceProvider` durch echte Implementierung ersetzen (flutter_tts oder Asset-Audio)
+- Long-Press auf beliebige IT-Wörter/-Sätze → Vorlesen (Infrastruktur bereits verdrahtet)
+- Entscheidung: mitgeliefertes Audio (Assets) vs. TTS (z. B. flutter_tts)
+- Übungstyp `listening`: Audio hören → Antwort tippen oder per MC
+
+### 🔜 Stufe 5 — Gamification + Politur + Release
+- XP-System: Punkte pro Übung, Levelsystem
+- Mastery-Stufen pro Vokabel (sichtbar auf Home-Screen)
+- UI-Sprache vollständig über `AppConstants.activeLang` entkoppelt
 - Weitere Zielsprachen (Schema bereits vorbereitet: `*_translations`-Tabellen)
 - Play Store Release, App-Icon, Splash

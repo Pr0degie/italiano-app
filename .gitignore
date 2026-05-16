@@ -49,11 +49,15 @@ android/local.properties
 android/.gradle/
 android/app/src/main/java/io/flutter/plugins/
 
-# iOS/macOS generated
-ios/Flutter/Generated.xcconfig
-ios/Flutter/flutter_export_environment.sh
-ios/Flutter/ephemeral/
-macos/Flutter/GeneratedPluginRegistrant.swift
+# Non-Android platforms (Flutter scaffold, regeneratable via flutter create --platforms=...)
+ios/
+macos/
+linux/
+windows/
+web/
+
+# Local dev files
+dashboard.html
 
 # Dart build_runner output
 *.g.dart
