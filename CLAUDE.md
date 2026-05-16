@@ -129,13 +129,26 @@ Flutter-Projekt, pubspec, Ordnerstruktur, Drift-DB mit vollem Schema, build_runn
 
 Felder in `ReviewState`: `consecutiveCorrectDays`, `lastReviewedDate`, `masteredAt`, `dueDate` (nullable).
 
-### 🔜 Stufe 2 — Weitere Übungstypen + Content-Pipeline
-- JSON-Content-Loader: `assets/content/manifest.json` → Seeder ersetzt Dummy-Daten
+### 🔜 Stufe 2 — Weitere Übungstypen + Content-Pipeline + Sprachagnostik
+
+#### Content-Pipeline
+- JSON-Content-Loader: `assets/content/<lang>/manifest.json` → Seeder ersetzt Dummy-Daten
 - `LessonSteps.suggestedExerciseType` im Player auswerten
-- Übungstyp `pair` (Zuordnung: Wort↔Übersetzung per Drag oder Tap)
-- Übungstyp `typing` (Freitext-Eingabe mit Toleranz für Tippfehler)
 - Satz-Übungen aus JSON statt Hardcode (`sentence_exercises.dart` entfällt)
 - Stats-Seite: Items gelernt, Wiederholungen, Erfolgsquote
+
+#### Neue Übungstypen
+- `pair`: Zuordnung Wort↔Übersetzung per Drag oder Tap
+- `typing`: Freitext-Eingabe mit Toleranz für Tippfehler
+
+#### Sprachagnostik (Ziel: neue Sprache = neue JSON-Datei)
+Das Schema ist bereits korrekt (`*_translations`-Tabellen mit `lang`-Spalte). Folgendes muss bereinigt werden:
+
+- Hardcodiertes `'de'` in Queries → `AppConstants.activeLang` (3 Stellen: `lesson_providers.dart`, `review_session_notifier.dart`)
+- `VocabStepData.italiano` + `.translationDe` → `.target` + `.native` (zieht sich durch lesson/review)
+- `SentenceBuilderStep.italianWords` + `.german` → `.targetWords` + `.nativePrompt`
+- `AppConstants` um `targetLang` (Zielsprache, z.B. `'it'`) erweitern, nicht nur `activeLang` (Muttersprache)
+- JSON-Struktur: `assets/content/<targetLang>/` — eine Sprache, ein Ordner
 
 ### 🔜 Stufe 3 — Grammatik-Lektionen + Grammatik-Übungen
 - Neuer Lektionstyp `grammar` neben `vocab`
