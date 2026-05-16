@@ -84,6 +84,7 @@ App-Run: `flutter run` (S25+ per USB)
 
 ## Git
 Commits lowercase, kein Conventional-Commits-Präfix (`add lesson_steps table`, nicht `feat: ...`).
+Commit-Messages immer auf Englisch.
 Commit-Message vor `git commit` als Vorschlag zeigen.
 
 ## Anti-Patterns
