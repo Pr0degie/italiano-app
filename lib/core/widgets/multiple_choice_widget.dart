@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 /// - [selected]: aktuell gewählte Antwort (null = noch keine Auswahl)
 /// - [onSelect]: Callback mit der gewählten Antwort; wird nach Auswahl gesperrt
 /// - [colors]: optionale Buttonfarben (Standard: blau, pink, gelb, lila)
-class ChoiceGrid extends StatelessWidget {
-  const ChoiceGrid({
+class MultipleChoiceWidget extends StatelessWidget {
+  const MultipleChoiceWidget({
     super.key,
     required this.options,
     required this.correct,
@@ -18,7 +18,7 @@ class ChoiceGrid extends StatelessWidget {
     this.crossAxisSpacing = 12,
     this.mainAxisSpacing = 12,
     this.childAspectRatio = 2.2,
-  }) : assert(options.length == 4, 'ChoiceGrid benötigt genau 4 Optionen');
+  }) : assert(options.length == 4, 'MultipleChoiceWidget benötigt genau 4 Optionen');
 
   final List<String> options;
   final String correct;

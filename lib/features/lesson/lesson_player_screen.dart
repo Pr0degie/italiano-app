@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/widgets/choice_grid.dart';
+import '../../core/widgets/multiple_choice_widget.dart';
 import '../../core/widgets/flash_card.dart';
 import '../home/home_providers.dart';
 import 'lesson_session_notifier.dart';
@@ -227,7 +227,7 @@ class _ExerciseScreenState extends ConsumerState<_ExerciseScreen> {
               },
             ),
             const SizedBox(height: 32),
-            ChoiceGrid(
+            MultipleChoiceWidget(
               options: step.options,
               correct: correct,
               selected: _selected,

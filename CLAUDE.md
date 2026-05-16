@@ -38,7 +38,7 @@ lib/
     sm2/
       sm2.dart              # SM-2-Algorithmus
     widgets/
-      choice_grid.dart
+      multiple_choice_widget.dart
       flash_card.dart
   features/
     home/                   # home_screen.dart, home_providers.dart
