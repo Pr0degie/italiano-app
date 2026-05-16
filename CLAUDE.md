@@ -99,11 +99,10 @@ Commit-Message vor `git commit` als Vorschlag zeigen.
 ### ✅ Stufe 0 — Fundament
 Flutter-Projekt, pubspec, Ordnerstruktur, Drift-DB mit vollem Schema, build_runner-Setup.
 
-### 🟡 Stufe 1 — Vokabel-Lektionen + Lektionsstruktur + Streak/Tagesziel
-**Fertig:**
+### ✅ Stufe 1 — Vokabel-Lektionen + Lektionsstruktur + Streak/Tagesziel
 - DB-Schema komplett (Chapters → Lessons → LessonSteps → Items/Exercises, Progress, SM-2)
 - Seeder mit Dummy-Vokabeln
-- Home-Screen (Kapitel/Lektionen-Liste, Review-Badge, DailyActivity-Streak-Placeholder)
+- Home-Screen: Kapitel/Lektionen-Liste, Streak-Anzeige, Tagesziel-Balken, Fortschrittsbalken pro Kapitel
 - Lesson-Player: Intro-Phase (FlashCard) → Exercise-Phase → Done
 - Exercise-Phase: gemischte Übungstypen via `sealed class AnyExerciseStep`
   - `MCExerciseStep`: Multiple-Choice (4 Optionen, FlashCard-Flip-Feedback)
@@ -115,10 +114,6 @@ Flutter-Projekt, pubspec, Ordnerstruktur, Drift-DB mit vollem Schema, build_runn
 - Review-Session: fällige Items per SM-2, MC bidirektional (IT→DE / DE→IT)
 - SM-2-Algorithmus in `core/sm2/sm2.dart`
 - `LessonProgress` + `DailyActivity` werden nach jeder Session geschrieben
-
-**Ausstehend:**
-- DailyActivity-UI: Streak-Anzeige, Tages-Ziel (`AppConstants.dailyGoalItems`)
-- Fortschrittsbalken pro Kapitel auf Home-Screen
 
 ### 🔜 Stufe 2 — Weitere Übungstypen + Content-Pipeline
 - JSON-Content-Loader: `assets/content/manifest.json` → Seeder ersetzt Dummy-Daten

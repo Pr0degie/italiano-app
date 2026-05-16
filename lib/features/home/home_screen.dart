@@ -111,23 +111,42 @@ class _ChapterCardState extends State<_ChapterCard> {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(children: [
-              Icon(ch.isUnlocked ? Icons.folder_outlined : Icons.lock_outline,
-                  size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(ch.title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: ch.isUnlocked
-                            ? null
-                            : cs.onSurface.withOpacity(0.4))),
-              ),
-              Text('${(ch.completionRate * 100).toStringAsFixed(0)}%',
-                  style: TextStyle(fontSize: 12,
-                      color: cs.onSurface.withOpacity(0.6))),
-              const SizedBox(width: 4),
-              Icon(_expanded ? Icons.expand_less : Icons.expand_more),
-            ]),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  Icon(ch.isUnlocked ? Icons.folder_outlined : Icons.lock_outline,
+                      size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(ch.title,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: ch.isUnlocked
+                                ? null
+                                : cs.onSurface.withOpacity(0.4))),
+                  ),
+                  Text('${(ch.completionRate * 100).toStringAsFixed(0)}%',
+                      style: TextStyle(fontSize: 12,
+                          color: cs.onSurface.withOpacity(0.6))),
+                  const SizedBox(width: 4),
+                  Icon(_expanded ? Icons.expand_less : Icons.expand_more),
+                ]),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: ch.completionRate,
+                    minHeight: 6,
+                    backgroundColor: cs.surfaceContainerHighest,
+                    color: ch.completionRate >= 1.0
+                        ? Colors.green
+                        : ch.isUnlocked
+                            ? cs.primary
+                            : cs.onSurface.withOpacity(0.2),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         if (_expanded) ...ch.lessons.map((l) => _LessonTile(lesson: l)),
