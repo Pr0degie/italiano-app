@@ -139,32 +139,23 @@ Flutter-Projekt, pubspec, Ordnerstruktur, Drift-DB mit vollem Schema, build_runn
 
 Felder in `ReviewState`: `consecutiveCorrectDays`, `lastReviewedDate`, `masteredAt`, `dueDate` (nullable).
 
-### 🟡 Stufe 2 — Weitere Übungstypen + Content-Pipeline + Sprachagnostik
+### ✅ Stufe 2 — Weitere Übungstypen + Content-Pipeline + Sprachagnostik
 
-#### ✅ Sprachagnostik (fertig)
-- `AppConstants.targetLang` (Zielsprache, aktuell `'it'`) + `activeLang` (Muttersprache, `'de'`)
-- Felder umbenannt: `VocabStepData.target`/`.native`, `SentenceBuilderStep.nativePrompt`/`.targetWords`, `SentenceBuilderWidget.nativeSentence`/`.targetWords`, `ReviewExerciseStep.showTarget`
-- Alle hardcoded `'de'` durch `AppConstants.activeLang` ersetzt
-- Schema bleibt unverändert (war bereits sprachagnostisch über `*_translations`-Tabellen)
+Komplett bis auf den finalen Content-Konvert (siehe unten).
 
-#### ✅ Content-Pipeline (fertig)
-- JSON-Assets: `assets/content/it/manifest.json` + `lessons/lesson.*.json`
-- Manifest: `schemaVersion` (Format-Version) + `contentVersion` (Re-Seed-Trigger) + `targetLang`/`nativeLang` + `chapters[]`
-- Lesson-JSON: `steps[]` mit Discriminator `kind` (`vocab` | `sentence_builder` | später `pair`/`typing`)
-- `lib/core/content/models.dart`: ContentManifest, ContentChapter, ContentLesson, sealed ContentStep (VocabContentStep, SentenceBuilderContentStep)
-- `lib/core/content/content_loader.dart`: liest Manifest + Lessons über rootBundle
-- `lib/core/seeding/seeder.dart`: ContentSeeder schreibt aus LoadedContent in DB; sentence_builder als `Exercises` mit `payload={"words":[...]}` + `ExerciseTranslations.prompt`
-- `lib/features/lesson/lesson_providers.dart`: `LessonData.sentences` aus DB via `exerciseId`
-- Entfernt: `dummy_content.dart`, `sentence_exercises.dart`
+- **Sprachagnostik**: `AppConstants.targetLang`/`.activeLang`, durchgängig `target`/`native`-Naming.
+- **JSON-Content-Pipeline**: `assets/content/it/{manifest.json, lessons/*.json}`; `models.dart` (sealed `ContentStep`) + `content_loader.dart` + `seeder.dart` mit `contentVersion`-Trigger.
+- **`suggestedExerciseType`**: wird im Player über Switch ausgewertet (`_buildExercisePhase`).
+- **Übungstyp `pair`**: `PairWidget` (4er-Match-Spiel, Tap, Audio-Long-Press). Vokabeln mit `suggested: pair` werden zu 4er-Gruppen gebatcht; Rest <4 → MC-Fallback.
+- **Übungstyp `typing`**: `TypingWidget` + `lib/core/text/fuzzy_match.dart` (Diakritika-Normalisierung + Levenshtein, Toleranz ≤1/≤2). Drei Ergebnis-Stufen: exact, almost (gelb), wrong.
+- **Stats-Screen**: `lib/features/stats/` mit Vokabel-/Lektion-KPIs + 30-Tage-Aktivitäts-Chart. Home-AppBar hat Bar-Chart-Icon.
+- **Content-Authoring**: `tools/`-Ordner
+  - `content_data.py` — 10 Lektionen vorbefüllt (100 Vokabeln, 30 Sätze, gemischt mc/pair/typing)
+  - `build_template.py` → erzeugt `tools/content_template.xlsx`
+  - `xlsx_to_json.py` → liest das xlsx und schreibt `assets/content/it/` neu (bumpt `contentVersion` automatisch)
 
-#### 🔜 Stufe 2 — Rest
-- `LessonSteps.suggestedExerciseType` im Player auswerten (aktuell wird MC zufällig generiert; Seeder setzt bereits `'mc'`)
-- Übungstyp `pair`: Zuordnung Wort↔Übersetzung per Drag oder Tap → neues Widget in `lib/core/widgets/`
-- Übungstyp `typing`: Freitext mit Tippfehler-Toleranz → neues Widget
-- Stats-Seite: Items gelernt, Wiederholungen, Erfolgsquote
-- Content-Erstellung: 10 Lektionen via xlsx-Workbook (User-Freundin reviewt, dann → JSON konvertieren)
-  - Themen: Begrüßung · Familie · Zahlen · Essen · Café · Farben · Wochentage/Uhrzeit · Adjektive · Häufige Verben · Im Haus
-  - xlsx-Format: 1 Sheet pro Lektion + 1 Manifest-Sheet; Spalten Vokabeln: `slug | italiano | deutsch | wortart | artikel | plural | beispielsatz_it | beispielsatz_de | notiz`; Sätze: `italiano | deutsch | notiz`
+#### Offener Rest in Stufe 2
+- Freundin reviewt `tools/content_template.xlsx`. Danach `python3 tools/xlsx_to_json.py` ausführen → ersetzt die bestehenden Lessons. `flutter run` triggert den Re-Seed automatisch über `contentVersion`.
 
 ### 🔜 Stufe 3 — Grammatik-Lektionen + Grammatik-Übungen
 - Neuer Lektionstyp `grammar` neben `vocab`
