@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/widgets/multiple_choice_widget.dart';
 import '../../core/widgets/flash_card.dart';
+import '../../core/widgets/pair_widget.dart';
 import '../../core/widgets/sentence_builder_widget.dart';
 import '../home/home_providers.dart';
 import 'lesson_session_notifier.dart';
@@ -163,6 +164,12 @@ class _ExerciseScreen extends ConsumerWidget {
                 key: ValueKey('sb-${session.currentIndex}'),
                 nativeSentence: s.nativePrompt,
                 targetWords: s.targetWords,
+                onComplete: notifier.answerExercise,
+              ),
+            PairExerciseStep s => PairWidget(
+                key: ValueKey('pair-${session.currentIndex}'),
+                targets: s.vocab.map((v) => v.target).toList(),
+                natives: s.vocab.map((v) => v.native).toList(),
                 onComplete: notifier.answerExercise,
               ),
           },

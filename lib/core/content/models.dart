@@ -106,6 +106,7 @@ class VocabContentStep extends ContentStep {
     required this.target,
     required this.native,
     this.partOfSpeech,
+    this.suggestedExerciseType,
   });
 
   factory VocabContentStep.fromJson(Map<String, dynamic> json) =>
@@ -114,12 +115,17 @@ class VocabContentStep extends ContentStep {
         target: json['target'] as String,
         native: json['native'] as String,
         partOfSpeech: json['partOfSpeech'] as String?,
+        suggestedExerciseType: json['suggested'] as String?,
       );
 
   final String itemId;
   final String target;
   final String native;
   final String? partOfSpeech;
+
+  /// Optional: 'mc' (Default), 'pair', 'typing'. Steuert die Übungs-Generierung
+  /// in der Exercise-Phase.
+  final String? suggestedExerciseType;
 }
 
 class SentenceBuilderContentStep extends ContentStep {

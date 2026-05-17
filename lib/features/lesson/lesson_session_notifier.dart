@@ -33,6 +33,14 @@ class SentenceBuilderStep extends AnyExerciseStep {
   final List<String> targetWords;
 }
 
+@immutable
+class PairExerciseStep extends AnyExerciseStep {
+  PairExerciseStep({required this.vocab});
+
+  /// Vokabeln, die in dieser Übung gepaart werden sollen (typisch 4).
+  final List<VocabStepData> vocab;
+}
+
 // Backwards-compat alias so bestehende call-sites (falls vorhanden) nicht brechen
 typedef ExerciseStep = MCExerciseStep;
 
@@ -126,11 +134,35 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
   void _buildExercisePhase() {
     final allTranslations = state.steps.map((s) => s.native).toList();
 
-    // Vokabel-Übungen nach suggestedExerciseType routen
-    final vocabSteps =
-        state.steps.map((v) => _buildVocabExercise(v, allTranslations)).toList();
+    // Vokabeln nach suggestedExerciseType partitionieren
+    final pairVocab = <VocabStepData>[];
+    final mcVocab = <VocabStepData>[];
+    for (final v in state.steps) {
+      switch (v.suggestedExerciseType ?? 'mc') {
+        case 'pair':
+          pairVocab.add(v);
+          break;
+        // 'typing' folgt später; bis dahin → MC-Fallback
+        default:
+          mcVocab.add(v);
+      }
+    }
 
-    // Satz-Übungen für diese Lektion (aus DB geladen)
+    // Pair: in 4er-Gruppen batchen. Rest <4 → MC-Fallback.
+    const pairSize = 4;
+    final pairSteps = <AnyExerciseStep>[];
+    for (var i = 0; i + pairSize <= pairVocab.length; i += pairSize) {
+      pairSteps.add(
+          PairExerciseStep(vocab: pairVocab.sublist(i, i + pairSize)));
+    }
+    final leftover = pairVocab.length % pairSize;
+    if (leftover > 0) {
+      mcVocab.addAll(pairVocab.sublist(pairVocab.length - leftover));
+    }
+
+    final mcSteps =
+        mcVocab.map((v) => _buildMC(v, allTranslations)).toList();
+
     final sentenceSteps = state.sentences
         .map((s) => SentenceBuilderStep(
               nativePrompt: s.nativePrompt,
@@ -138,26 +170,17 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
             ))
         .toList();
 
-    final allSteps = <AnyExerciseStep>[...vocabSteps, ...sentenceSteps]
-      ..shuffle(_rng);
+    final allSteps = <AnyExerciseStep>[
+      ...mcSteps,
+      ...pairSteps,
+      ...sentenceSteps,
+    ]..shuffle(_rng);
 
     state = state.copyWith(
       phase: LessonPhase.exercise,
       currentIndex: 0,
       exerciseSteps: allSteps,
     );
-  }
-
-  AnyExerciseStep _buildVocabExercise(
-      VocabStepData v, List<String> translationPool) {
-    final type = v.suggestedExerciseType ?? 'mc';
-    switch (type) {
-      case 'mc':
-        return _buildMC(v, translationPool);
-      // 'pair', 'typing' folgen in späteren Schritten von Stufe 2.
-      default:
-        return _buildMC(v, translationPool);
-    }
   }
 
   MCExerciseStep _buildMC(VocabStepData v, List<String> translationPool) {
@@ -189,11 +212,18 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
     final now = DateTime.now();
 
     await db.transaction(() async {
+      // Alle Vokabel-itemIds aus dieser Session sammeln (MC + Pair)
+      final touchedItemIds = <String>{
+        for (final step in steps)
+          ...switch (step) {
+            MCExerciseStep s => [s.vocab.itemId],
+            PairExerciseStep s => s.vocab.map((v) => v.itemId),
+            SentenceBuilderStep _ => const <String>[],
+          },
+      };
+
       // Neue Items in Phase 1 (Daily Drill) eintragen — nur wenn noch kein Eintrag existiert
-      for (var i = 0; i < steps.length; i++) {
-        final step = steps[i];
-        if (step is! MCExerciseStep) continue;
-        final itemId = step.vocab.itemId;
+      for (final itemId in touchedItemIds) {
         final existing = await (db.select(db.reviewState)
               ..where((r) => r.itemId.equals(itemId)))
             .getSingleOrNull();
@@ -221,7 +251,16 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
             ),
           );
 
-      await recordItemsDone(db, steps.length, isLesson: true);
+      // Items zählen pro Vokabel/Satz (Pair = 4 Items), nicht pro UI-Übung
+      final itemCount = steps.fold<int>(
+        0,
+        (acc, step) => acc + switch (step) {
+          MCExerciseStep _ => 1,
+          PairExerciseStep s => s.vocab.length,
+          SentenceBuilderStep _ => 1,
+        },
+      );
+      await recordItemsDone(db, itemCount, isLesson: true);
     });
   }
 }

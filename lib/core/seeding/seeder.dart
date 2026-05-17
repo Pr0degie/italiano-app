@@ -105,7 +105,7 @@ class ContentSeeder {
             lessonId: lessonId,
             sortOrder: sortOrder,
             itemId: Value(step.itemId),
-            suggestedExerciseType: const Value('mc'),
+            suggestedExerciseType: Value(step.suggestedExerciseType ?? 'mc'),
           ),
         );
   }
