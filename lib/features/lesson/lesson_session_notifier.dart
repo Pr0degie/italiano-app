@@ -41,6 +41,12 @@ class PairExerciseStep extends AnyExerciseStep {
   final List<VocabStepData> vocab;
 }
 
+@immutable
+class TypingExerciseStep extends AnyExerciseStep {
+  TypingExerciseStep({required this.vocab});
+  final VocabStepData vocab;
+}
+
 // Backwards-compat alias so bestehende call-sites (falls vorhanden) nicht brechen
 typedef ExerciseStep = MCExerciseStep;
 
@@ -136,13 +142,16 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
 
     // Vokabeln nach suggestedExerciseType partitionieren
     final pairVocab = <VocabStepData>[];
+    final typingVocab = <VocabStepData>[];
     final mcVocab = <VocabStepData>[];
     for (final v in state.steps) {
       switch (v.suggestedExerciseType ?? 'mc') {
         case 'pair':
           pairVocab.add(v);
           break;
-        // 'typing' folgt später; bis dahin → MC-Fallback
+        case 'typing':
+          typingVocab.add(v);
+          break;
         default:
           mcVocab.add(v);
       }
@@ -160,6 +169,9 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
       mcVocab.addAll(pairVocab.sublist(pairVocab.length - leftover));
     }
 
+    final typingSteps =
+        typingVocab.map((v) => TypingExerciseStep(vocab: v)).toList();
+
     final mcSteps =
         mcVocab.map((v) => _buildMC(v, allTranslations)).toList();
 
@@ -173,6 +185,7 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
     final allSteps = <AnyExerciseStep>[
       ...mcSteps,
       ...pairSteps,
+      ...typingSteps,
       ...sentenceSteps,
     ]..shuffle(_rng);
 
@@ -212,12 +225,13 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
     final now = DateTime.now();
 
     await db.transaction(() async {
-      // Alle Vokabel-itemIds aus dieser Session sammeln (MC + Pair)
+      // Alle Vokabel-itemIds aus dieser Session sammeln
       final touchedItemIds = <String>{
         for (final step in steps)
           ...switch (step) {
             MCExerciseStep s => [s.vocab.itemId],
             PairExerciseStep s => s.vocab.map((v) => v.itemId),
+            TypingExerciseStep s => [s.vocab.itemId],
             SentenceBuilderStep _ => const <String>[],
           },
       };
@@ -257,6 +271,7 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
         (acc, step) => acc + switch (step) {
           MCExerciseStep _ => 1,
           PairExerciseStep s => s.vocab.length,
+          TypingExerciseStep _ => 1,
           SentenceBuilderStep _ => 1,
         },
       );

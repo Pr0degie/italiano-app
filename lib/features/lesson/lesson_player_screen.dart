@@ -5,6 +5,7 @@ import '../../core/widgets/multiple_choice_widget.dart';
 import '../../core/widgets/flash_card.dart';
 import '../../core/widgets/pair_widget.dart';
 import '../../core/widgets/sentence_builder_widget.dart';
+import '../../core/widgets/typing_widget.dart';
 import '../home/home_providers.dart';
 import 'lesson_session_notifier.dart';
 
@@ -170,6 +171,12 @@ class _ExerciseScreen extends ConsumerWidget {
                 key: ValueKey('pair-${session.currentIndex}'),
                 targets: s.vocab.map((v) => v.target).toList(),
                 natives: s.vocab.map((v) => v.native).toList(),
+                onComplete: notifier.answerExercise,
+              ),
+            TypingExerciseStep s => TypingWidget(
+                key: ValueKey('typing-${session.currentIndex}'),
+                nativePrompt: s.vocab.native,
+                targetAnswer: s.vocab.target,
                 onComplete: notifier.answerExercise,
               ),
           },
