@@ -126,14 +126,9 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
   void _buildExercisePhase() {
     final allTranslations = state.steps.map((s) => s.native).toList();
 
-    // MC-Übungen aus Vokabeln
-    final mcSteps = state.steps.map((v) {
-      final correct = v.native;
-      final distractors =
-          (allTranslations.where((t) => t != correct).toList()..shuffle(_rng));
-      final options = ([correct, ...distractors.take(3)]..shuffle(_rng));
-      return MCExerciseStep(vocab: v, options: options);
-    }).toList();
+    // Vokabel-Übungen nach suggestedExerciseType routen
+    final vocabSteps =
+        state.steps.map((v) => _buildVocabExercise(v, allTranslations)).toList();
 
     // Satz-Übungen für diese Lektion (aus DB geladen)
     final sentenceSteps = state.sentences
@@ -143,7 +138,7 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
             ))
         .toList();
 
-    final allSteps = <AnyExerciseStep>[...mcSteps, ...sentenceSteps]
+    final allSteps = <AnyExerciseStep>[...vocabSteps, ...sentenceSteps]
       ..shuffle(_rng);
 
     state = state.copyWith(
@@ -151,6 +146,26 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
       currentIndex: 0,
       exerciseSteps: allSteps,
     );
+  }
+
+  AnyExerciseStep _buildVocabExercise(
+      VocabStepData v, List<String> translationPool) {
+    final type = v.suggestedExerciseType ?? 'mc';
+    switch (type) {
+      case 'mc':
+        return _buildMC(v, translationPool);
+      // 'pair', 'typing' folgen in späteren Schritten von Stufe 2.
+      default:
+        return _buildMC(v, translationPool);
+    }
+  }
+
+  MCExerciseStep _buildMC(VocabStepData v, List<String> translationPool) {
+    final correct = v.native;
+    final distractors =
+        translationPool.where((t) => t != correct).toList()..shuffle(_rng);
+    final options = [correct, ...distractors.take(3)]..shuffle(_rng);
+    return MCExerciseStep(vocab: v, options: options);
   }
 
   void answerExercise(bool correct) {

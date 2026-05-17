@@ -21,7 +21,7 @@ final barProvider = NotifierProvider.autoDispose<BarNotifier, BarState>(BarNotif
 ```
 lib/
   core/
-    constants.dart          # AppConstants.activeLang etc.
+    constants.dart          # AppConstants.activeLang (Muttersprache) + targetLang (Zielsprache)
     database/
       database.dart         # AppDatabase (alle Tabellen registriert)
       database.g.dart       # generiert — nicht anfassen
@@ -32,10 +32,11 @@ lib/
         exercises.dart      # Exercises, ExerciseTranslations
         lessons.dart        # Lessons, LessonTranslations, LessonSteps
         progress.dart       # ReviewState, LessonProgress, DailyActivity
+    content/
+      models.dart           # ContentManifest, ContentChapter, ContentLesson, sealed ContentStep
+      content_loader.dart   # ContentLoader: liest JSON-Assets via rootBundle
     seeding/
-      seeder.dart              # DB-Seeder (nur dev-Start, kein Prod-Pfad)
-      dummy_content.dart       # Seed-Daten (Ausnahme vom Anti-Pattern: Seeder-only)
-      sentence_exercises.dart  # Satz-Bau-Übungen je Lektion (in-memory, kein DB)
+      seeder.dart           # ContentSeeder: LoadedContent → DB; nutzt contentVersion zum Re-Seed-Trigger
     audio/
       audio_service.dart    # AudioService (abstract) + _NoOpAudioService + audioServiceProvider
     sm2/
@@ -50,30 +51,39 @@ lib/
                             # lesson_session_notifier.dart
     review/                 # review_screen.dart, review_providers.dart,
                             # review_session_notifier.dart
+assets/
+  content/
+    it/
+      manifest.json         # schemaVersion + contentVersion + chapters[].lessonFiles[]
+      lessons/
+        lesson.*.json       # eine Datei pro Lektion: steps[] mit kind-Discriminator
 ```
 Feature-Dateien sind **flach** (kein data/application/presentation-Split).
 
 ## Konventionen
-- Content-IDs: stabile Slugs (`lesson.basics-01`, `vocab.casa`). User-Zeilen autoincrement.
-- Übersetzbares in `*_translations`-Tabellen. Italienisch direkt auf Content-Tabellen.
-- `AppConstants.activeLang` verwenden — Sprache nie hardcoden.
+- Content-IDs: stabile Slugs (`lesson.basics-01`, `vocab.casa`, `ex.01-01.s01`). User-Zeilen autoincrement.
+- Übersetzbares in `*_translations`-Tabellen; Zielsprache direkt auf Content-Tabellen (`vocab_items.front`).
+- `AppConstants.activeLang` / `.targetLang` verwenden — Sprache nie hardcoden.
+- Naming: `target` (Zielsprache) ↔ `native` (Muttersprache des Nutzers). Nie `italiano`/`german`.
 - Drift-Tabellen in `lib/core/database/tables/`, nach Domäne gruppiert.
+- Neue Übungstypen: Discriminator-Wert in JSON (`kind`) + neuer Subtyp von `ContentStep` + neuer Subtyp von `AnyExerciseStep` + Widget in `lib/core/widgets/`.
+- Bei Content-Änderung in `assets/content/it/`: `manifest.json` → `contentVersion` hochzählen, sonst läuft Re-Seed nicht.
 - Code selbsterklärend; Kommentare nur wo nicht offensichtlich.
 
 ## Audio / Long-Press-Vorlesen
-Jedes Widget das italienischen Text anzeigt, soll Long-Press zum Vorlesen unterstützen.
+Jedes Widget das Text in der Zielsprache anzeigt, soll Long-Press zum Vorlesen unterstützen.
 Implementierung via `audioServiceProvider` (`core/audio/audio_service.dart`):
 
 ```dart
 GestureDetector(
-  onLongPress: () => ref.read(audioServiceProvider).speak(italianoText),
-  child: Text(italianoText),
+  onLongPress: () => ref.read(audioServiceProvider).speak(targetText),
+  child: Text(targetText),
 )
 ```
 
 Bis Stufe 4 ist der Provider ein No-Op (tut nichts). In Stufe 4 wird nur die
 Provider-Implementierung getauscht — alle Widgets bleiben unverändert.
-→ Bei neuen Widgets die IT-Text rendern: `onLongPress` von Anfang an verdrahten.
+→ Bei neuen Widgets die Zielsprache-Text rendern: `onLongPress` von Anfang an verdrahten.
 
 ## Build
 Schema- oder Provider-Änderungen → build_runner:
@@ -129,26 +139,32 @@ Flutter-Projekt, pubspec, Ordnerstruktur, Drift-DB mit vollem Schema, build_runn
 
 Felder in `ReviewState`: `consecutiveCorrectDays`, `lastReviewedDate`, `masteredAt`, `dueDate` (nullable).
 
-### 🔜 Stufe 2 — Weitere Übungstypen + Content-Pipeline + Sprachagnostik
+### 🟡 Stufe 2 — Weitere Übungstypen + Content-Pipeline + Sprachagnostik
 
-#### Content-Pipeline
-- JSON-Content-Loader: `assets/content/<lang>/manifest.json` → Seeder ersetzt Dummy-Daten
-- `LessonSteps.suggestedExerciseType` im Player auswerten
-- Satz-Übungen aus JSON statt Hardcode (`sentence_exercises.dart` entfällt)
+#### ✅ Sprachagnostik (fertig)
+- `AppConstants.targetLang` (Zielsprache, aktuell `'it'`) + `activeLang` (Muttersprache, `'de'`)
+- Felder umbenannt: `VocabStepData.target`/`.native`, `SentenceBuilderStep.nativePrompt`/`.targetWords`, `SentenceBuilderWidget.nativeSentence`/`.targetWords`, `ReviewExerciseStep.showTarget`
+- Alle hardcoded `'de'` durch `AppConstants.activeLang` ersetzt
+- Schema bleibt unverändert (war bereits sprachagnostisch über `*_translations`-Tabellen)
+
+#### ✅ Content-Pipeline (fertig)
+- JSON-Assets: `assets/content/it/manifest.json` + `lessons/lesson.*.json`
+- Manifest: `schemaVersion` (Format-Version) + `contentVersion` (Re-Seed-Trigger) + `targetLang`/`nativeLang` + `chapters[]`
+- Lesson-JSON: `steps[]` mit Discriminator `kind` (`vocab` | `sentence_builder` | später `pair`/`typing`)
+- `lib/core/content/models.dart`: ContentManifest, ContentChapter, ContentLesson, sealed ContentStep (VocabContentStep, SentenceBuilderContentStep)
+- `lib/core/content/content_loader.dart`: liest Manifest + Lessons über rootBundle
+- `lib/core/seeding/seeder.dart`: ContentSeeder schreibt aus LoadedContent in DB; sentence_builder als `Exercises` mit `payload={"words":[...]}` + `ExerciseTranslations.prompt`
+- `lib/features/lesson/lesson_providers.dart`: `LessonData.sentences` aus DB via `exerciseId`
+- Entfernt: `dummy_content.dart`, `sentence_exercises.dart`
+
+#### 🔜 Stufe 2 — Rest
+- `LessonSteps.suggestedExerciseType` im Player auswerten (aktuell wird MC zufällig generiert; Seeder setzt bereits `'mc'`)
+- Übungstyp `pair`: Zuordnung Wort↔Übersetzung per Drag oder Tap → neues Widget in `lib/core/widgets/`
+- Übungstyp `typing`: Freitext mit Tippfehler-Toleranz → neues Widget
 - Stats-Seite: Items gelernt, Wiederholungen, Erfolgsquote
-
-#### Neue Übungstypen
-- `pair`: Zuordnung Wort↔Übersetzung per Drag oder Tap
-- `typing`: Freitext-Eingabe mit Toleranz für Tippfehler
-
-#### Sprachagnostik (Ziel: neue Sprache = neue JSON-Datei)
-Das Schema ist bereits korrekt (`*_translations`-Tabellen mit `lang`-Spalte). Folgendes muss bereinigt werden:
-
-- Hardcodiertes `'de'` in Queries → `AppConstants.activeLang` (3 Stellen: `lesson_providers.dart`, `review_session_notifier.dart`)
-- `VocabStepData.italiano` + `.translationDe` → `.target` + `.native` (zieht sich durch lesson/review)
-- `SentenceBuilderStep.italianWords` + `.german` → `.targetWords` + `.nativePrompt`
-- `AppConstants` um `targetLang` (Zielsprache, z.B. `'it'`) erweitern, nicht nur `activeLang` (Muttersprache)
-- JSON-Struktur: `assets/content/<targetLang>/` — eine Sprache, ein Ordner
+- Content-Erstellung: 10 Lektionen via xlsx-Workbook (User-Freundin reviewt, dann → JSON konvertieren)
+  - Themen: Begrüßung · Familie · Zahlen · Essen · Café · Farben · Wochentage/Uhrzeit · Adjektive · Häufige Verben · Im Haus
+  - xlsx-Format: 1 Sheet pro Lektion + 1 Manifest-Sheet; Spalten Vokabeln: `slug | italiano | deutsch | wortart | artikel | plural | beispielsatz_it | beispielsatz_de | notiz`; Sätze: `italiano | deutsch | notiz`
 
 ### 🔜 Stufe 3 — Grammatik-Lektionen + Grammatik-Übungen
 - Neuer Lektionstyp `grammar` neben `vocab`

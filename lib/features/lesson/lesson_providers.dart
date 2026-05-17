@@ -15,6 +15,7 @@ class VocabStepData {
     required this.target,
     required this.native,
     required this.partOfSpeech,
+    this.suggestedExerciseType,
   });
   final String itemId;
 
@@ -24,6 +25,10 @@ class VocabStepData {
   /// Übersetzung in der Muttersprache des Nutzers.
   final String native;
   final String? partOfSpeech;
+
+  /// Welcher Übungstyp für dieses Item generiert werden soll ('mc', 'pair', ...).
+  /// Nur für Vokabeln aus einer Lektion gesetzt; `null` z. B. im Distractor-Pool.
+  final String? suggestedExerciseType;
 }
 
 class SentenceBuilderData {
@@ -74,11 +79,11 @@ Future<LessonData> loadLesson(AppDatabase db, String lessonId) async {
         ..orderBy([(s) => OrderingTerm.asc(s.sortOrder)]))
       .get();
 
-  final itemIds = steps.map((s) => s.itemId).whereType<String>().toList();
+  final vocabLessonSteps = steps.where((s) => s.itemId != null).toList();
   final exerciseIds = steps.map((s) => s.exerciseId).whereType<String>().toList();
 
   // Vokabeln
-  final stepData = await _loadVocabStepData(db, itemIds);
+  final stepData = await _loadVocabStepData(db, vocabLessonSteps);
 
   // Sentence-Builder-Übungen
   final sentences = await _loadSentenceBuilders(db, exerciseIds);
@@ -96,8 +101,10 @@ Future<LessonData> loadLesson(AppDatabase db, String lessonId) async {
 }
 
 Future<List<VocabStepData>> _loadVocabStepData(
-    AppDatabase db, List<String> itemIds) async {
-  if (itemIds.isEmpty) return const [];
+    AppDatabase db, List<LessonStep> vocabLessonSteps) async {
+  if (vocabLessonSteps.isEmpty) return const [];
+
+  final itemIds = vocabLessonSteps.map((s) => s.itemId!).toList();
 
   final vocabItems = await (db.select(db.vocabItems)
         ..where((v) => v.itemId.isIn(itemIds)))
@@ -110,13 +117,15 @@ Future<List<VocabStepData>> _loadVocabStepData(
       .get();
   final transMap = {for (final t in translations) t.itemId: t.translation};
 
-  return itemIds.map((id) {
+  return vocabLessonSteps.map((s) {
+    final id = s.itemId!;
     final v = vocabMap[id];
     return VocabStepData(
       itemId: id,
       target: v?.front ?? id,
       native: transMap[id] ?? '',
       partOfSpeech: v?.partOfSpeech,
+      suggestedExerciseType: s.suggestedExerciseType,
     );
   }).toList();
 }
