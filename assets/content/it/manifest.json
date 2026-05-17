@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "targetLang": "it",
+  "nativeLang": "de",
+  "chapters": [
+    {
+      "id": "chapter.01",
+      "title": "Grundlagen",
+      "sortOrder": 1,
+      "lessonFiles": [
+        "lessons/lesson.01-01.json",
+        "lessons/lesson.01-02.json",
+        "lessons/lesson.01-03.json"
+      ]
+    },
+    {
+      "id": "chapter.02",
+      "title": "Alltag",
+      "sortOrder": 2,
+      "lessonFiles": [
+        "lessons/lesson.02-01.json",
+        "lessons/lesson.02-02.json",
+        "lessons/lesson.02-03.json"
+      ]
+    }
+  ]
+}

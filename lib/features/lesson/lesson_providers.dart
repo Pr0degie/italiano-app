@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,16 +26,29 @@ class VocabStepData {
   final String? partOfSpeech;
 }
 
+class SentenceBuilderData {
+  const SentenceBuilderData({
+    required this.exerciseId,
+    required this.nativePrompt,
+    required this.targetWords,
+  });
+  final String exerciseId;
+  final String nativePrompt;
+  final List<String> targetWords;
+}
+
 class LessonData {
   const LessonData({
     required this.lessonId,
     required this.title,
     required this.steps,
+    required this.sentences,
     required this.allVocab,
   });
   final String lessonId;
   final String title;
   final List<VocabStepData> steps;
+  final List<SentenceBuilderData> sentences;
   /// Alle Vokabeln in der DB — für MC-Distractors (Review-Phase)
   final List<VocabStepData> allVocab;
 }
@@ -53,29 +68,49 @@ Future<LessonData> loadLesson(AppDatabase db, String lessonId) async {
             t.lessonId.equals(lessonId) & t.lang.equals(AppConstants.activeLang)))
       .getSingleOrNull();
 
-  // Steps for this lesson (ordered by sortOrder)
+  // Alle Steps in dieser Lektion (Order beibehalten für Konsistenz)
   final steps = await (db.select(db.lessonSteps)
         ..where((s) => s.lessonId.equals(lessonId))
         ..orderBy([(s) => OrderingTerm.asc(s.sortOrder)]))
       .get();
 
-  // Collect itemIds
   final itemIds = steps.map((s) => s.itemId).whereType<String>().toList();
+  final exerciseIds = steps.map((s) => s.exerciseId).whereType<String>().toList();
 
-  // Vocab items
+  // Vokabeln
+  final stepData = await _loadVocabStepData(db, itemIds);
+
+  // Sentence-Builder-Übungen
+  final sentences = await _loadSentenceBuilders(db, exerciseIds);
+
+  // Alle Vokabeln für MC-Distractors
+  final allVocab = await _loadAllVocab(db);
+
+  return LessonData(
+    lessonId: lessonId,
+    title: lt?.title ?? lessonId,
+    steps: stepData,
+    sentences: sentences,
+    allVocab: allVocab,
+  );
+}
+
+Future<List<VocabStepData>> _loadVocabStepData(
+    AppDatabase db, List<String> itemIds) async {
+  if (itemIds.isEmpty) return const [];
+
   final vocabItems = await (db.select(db.vocabItems)
         ..where((v) => v.itemId.isIn(itemIds)))
       .get();
   final vocabMap = {for (final v in vocabItems) v.itemId: v};
 
-  // Translations in native language
   final translations = await (db.select(db.itemTranslations)
         ..where(
             (t) => t.itemId.isIn(itemIds) & t.lang.equals(AppConstants.activeLang)))
       .get();
   final transMap = {for (final t in translations) t.itemId: t.translation};
 
-  final stepData = itemIds.map((id) {
+  return itemIds.map((id) {
     final v = vocabMap[id];
     return VocabStepData(
       itemId: id,
@@ -84,16 +119,33 @@ Future<LessonData> loadLesson(AppDatabase db, String lessonId) async {
       partOfSpeech: v?.partOfSpeech,
     );
   }).toList();
+}
 
-  // All vocab for distractors
-  final allVocab = await _loadAllVocab(db);
+Future<List<SentenceBuilderData>> _loadSentenceBuilders(
+    AppDatabase db, List<String> exerciseIds) async {
+  if (exerciseIds.isEmpty) return const [];
 
-  return LessonData(
-    lessonId: lessonId,
-    title: lt?.title ?? lessonId,
-    steps: stepData,
-    allVocab: allVocab,
-  );
+  final exercises = await (db.select(db.exercises)
+        ..where((e) =>
+            e.id.isIn(exerciseIds) & e.type.equals('sentence_builder')))
+      .get();
+
+  final translations = await (db.select(db.exerciseTranslations)
+        ..where((t) =>
+            t.exerciseId.isIn(exerciseIds) &
+            t.lang.equals(AppConstants.activeLang)))
+      .get();
+  final promptMap = {for (final t in translations) t.exerciseId: t.prompt};
+
+  return exercises.map((e) {
+    final payload = jsonDecode(e.payload ?? '{}') as Map<String, dynamic>;
+    final words = (payload['words'] as List).cast<String>();
+    return SentenceBuilderData(
+      exerciseId: e.id,
+      nativePrompt: promptMap[e.id] ?? '',
+      targetWords: words,
+    );
+  }).toList();
 }
 
 Future<List<VocabStepData>> _loadAllVocab(AppDatabase db) async {

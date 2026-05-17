@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/database/database.dart';
 import '../../core/database/providers.dart';
-import '../../core/seeding/sentence_exercises.dart';
 import '../home/home_providers.dart';
 import 'lesson_providers.dart';
 
@@ -42,6 +41,7 @@ class LessonSessionState {
   const LessonSessionState({
     required this.phase,
     required this.steps,
+    required this.sentences,
     required this.currentIndex,
     required this.exerciseSteps,
     required this.results,
@@ -51,6 +51,7 @@ class LessonSessionState {
   factory LessonSessionState.loading() => const LessonSessionState(
         phase: LessonPhase.loading,
         steps: [],
+        sentences: [],
         currentIndex: 0,
         exerciseSteps: [],
         results: {},
@@ -58,6 +59,7 @@ class LessonSessionState {
 
   final LessonPhase phase;
   final List<VocabStepData> steps;
+  final List<SentenceBuilderData> sentences;
   final int currentIndex;
   final List<AnyExerciseStep> exerciseSteps;
   final Map<int, bool> results;
@@ -66,6 +68,7 @@ class LessonSessionState {
   LessonSessionState copyWith({
     LessonPhase? phase,
     List<VocabStepData>? steps,
+    List<SentenceBuilderData>? sentences,
     int? currentIndex,
     List<AnyExerciseStep>? exerciseSteps,
     Map<int, bool>? results,
@@ -74,6 +77,7 @@ class LessonSessionState {
       LessonSessionState(
         phase: phase ?? this.phase,
         steps: steps ?? this.steps,
+        sentences: sentences ?? this.sentences,
         currentIndex: currentIndex ?? this.currentIndex,
         exerciseSteps: exerciseSteps ?? this.exerciseSteps,
         results: results ?? this.results,
@@ -102,6 +106,7 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
       state = state.copyWith(
         phase: LessonPhase.intro,
         steps: shuffledSteps,
+        sentences: data.sentences,
         currentIndex: 0,
       );
     } catch (e) {
@@ -130,9 +135,8 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
       return MCExerciseStep(vocab: v, options: options);
     }).toList();
 
-    // Satz-Übungen für diese Lektion
-    final sentences = sentencesByLesson[_lessonId] ?? [];
-    final sentenceSteps = sentences
+    // Satz-Übungen für diese Lektion (aus DB geladen)
+    final sentenceSteps = state.sentences
         .map((s) => SentenceBuilderStep(
               nativePrompt: s.nativePrompt,
               targetWords: s.targetWords,

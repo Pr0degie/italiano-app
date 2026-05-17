@@ -1,0 +1,19 @@
+{
+  "id": "lesson.01-01",
+  "chapterId": "chapter.01",
+  "sortOrder": 1,
+  "title": "Begrüßungen",
+  "steps": [
+    {"kind": "vocab", "itemId": "vocab.ciao", "target": "ciao", "native": "hallo / tschüss", "partOfSpeech": "interj"},
+    {"kind": "vocab", "itemId": "vocab.buongiorno", "target": "buongiorno", "native": "guten Morgen", "partOfSpeech": "interj"},
+    {"kind": "vocab", "itemId": "vocab.buonasera", "target": "buonasera", "native": "guten Abend", "partOfSpeech": "interj"},
+    {"kind": "vocab", "itemId": "vocab.arrivederci", "target": "arrivederci", "native": "auf Wiedersehen", "partOfSpeech": "interj"},
+    {"kind": "vocab", "itemId": "vocab.prego", "target": "prego", "native": "bitte (Antwort auf Dankeschön)", "partOfSpeech": "interj"},
+    {"kind": "vocab", "itemId": "vocab.grazie", "target": "grazie", "native": "danke", "partOfSpeech": "interj"},
+    {"kind": "vocab", "itemId": "vocab.scusa", "target": "scusa", "native": "entschuldigung (informell)", "partOfSpeech": "interj"},
+    {"kind": "vocab", "itemId": "vocab.si", "target": "sì", "native": "ja", "partOfSpeech": "adv"},
+    {"kind": "sentence_builder", "exerciseId": "ex.01-01.s01", "nativePrompt": "Hallo, ich heiße Marco.", "targetWords": ["Ciao,", "mi", "chiamo", "Marco."]},
+    {"kind": "sentence_builder", "exerciseId": "ex.01-01.s02", "nativePrompt": "Guten Morgen! Auf Wiedersehen.", "targetWords": ["Buongiorno!", "Arrivederci."]},
+    {"kind": "sentence_builder", "exerciseId": "ex.01-01.s03", "nativePrompt": "Danke, bitte!", "targetWords": ["Grazie,", "prego!"]}
+  ]
+}

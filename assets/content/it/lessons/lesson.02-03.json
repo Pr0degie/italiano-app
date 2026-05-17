@@ -1,0 +1,16 @@
+{
+  "id": "lesson.02-03",
+  "chapterId": "chapter.02",
+  "sortOrder": 3,
+  "title": "Uhrzeit",
+  "steps": [
+    {"kind": "vocab", "itemId": "vocab.ora", "target": "ora", "native": "Stunde / Uhr", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.mattina", "target": "mattina", "native": "Morgen", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.pomeriggio", "target": "pomeriggio", "native": "Nachmittag", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.sera", "target": "sera", "native": "Abend", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.notte", "target": "notte", "native": "Nacht", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.mezzogiorno", "target": "mezzogiorno", "native": "Mittag", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.mezzanotte", "target": "mezzanotte", "native": "Mitternacht", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.minuto", "target": "minuto", "native": "Minute", "partOfSpeech": "noun"}
+  ]
+}

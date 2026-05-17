@@ -1,0 +1,19 @@
+{
+  "id": "lesson.01-02",
+  "chapterId": "chapter.01",
+  "sortOrder": 2,
+  "title": "Zahlen 1–10",
+  "steps": [
+    {"kind": "vocab", "itemId": "vocab.uno", "target": "uno", "native": "eins", "partOfSpeech": "num"},
+    {"kind": "vocab", "itemId": "vocab.due", "target": "due", "native": "zwei", "partOfSpeech": "num"},
+    {"kind": "vocab", "itemId": "vocab.tre", "target": "tre", "native": "drei", "partOfSpeech": "num"},
+    {"kind": "vocab", "itemId": "vocab.quattro", "target": "quattro", "native": "vier", "partOfSpeech": "num"},
+    {"kind": "vocab", "itemId": "vocab.cinque", "target": "cinque", "native": "fünf", "partOfSpeech": "num"},
+    {"kind": "vocab", "itemId": "vocab.sei", "target": "sei", "native": "sechs", "partOfSpeech": "num"},
+    {"kind": "vocab", "itemId": "vocab.sette", "target": "sette", "native": "sieben", "partOfSpeech": "num"},
+    {"kind": "vocab", "itemId": "vocab.otto", "target": "otto", "native": "acht", "partOfSpeech": "num"},
+    {"kind": "sentence_builder", "exerciseId": "ex.01-02.s01", "nativePrompt": "Ich habe drei Äpfel.", "targetWords": ["Ho", "tre", "mele."]},
+    {"kind": "sentence_builder", "exerciseId": "ex.01-02.s02", "nativePrompt": "Eins, zwei, drei, vier.", "targetWords": ["Uno,", "due,", "tre,", "quattro."]},
+    {"kind": "sentence_builder", "exerciseId": "ex.01-02.s03", "nativePrompt": "Sie hat fünf Bücher.", "targetWords": ["Ha", "cinque", "libri."]}
+  ]
+}

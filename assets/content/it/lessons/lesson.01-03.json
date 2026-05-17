@@ -1,0 +1,19 @@
+{
+  "id": "lesson.01-03",
+  "chapterId": "chapter.01",
+  "sortOrder": 3,
+  "title": "Farben",
+  "steps": [
+    {"kind": "vocab", "itemId": "vocab.rosso", "target": "rosso", "native": "rot", "partOfSpeech": "adj"},
+    {"kind": "vocab", "itemId": "vocab.blu", "target": "blu", "native": "blau", "partOfSpeech": "adj"},
+    {"kind": "vocab", "itemId": "vocab.verde", "target": "verde", "native": "grün", "partOfSpeech": "adj"},
+    {"kind": "vocab", "itemId": "vocab.giallo", "target": "giallo", "native": "gelb", "partOfSpeech": "adj"},
+    {"kind": "vocab", "itemId": "vocab.bianco", "target": "bianco", "native": "weiß", "partOfSpeech": "adj"},
+    {"kind": "vocab", "itemId": "vocab.nero", "target": "nero", "native": "schwarz", "partOfSpeech": "adj"},
+    {"kind": "vocab", "itemId": "vocab.arancione", "target": "arancione", "native": "orange", "partOfSpeech": "adj"},
+    {"kind": "vocab", "itemId": "vocab.viola", "target": "viola", "native": "lila", "partOfSpeech": "adj"},
+    {"kind": "sentence_builder", "exerciseId": "ex.01-03.s01", "nativePrompt": "Das Auto ist rot.", "targetWords": ["La", "macchina", "è", "rossa."]},
+    {"kind": "sentence_builder", "exerciseId": "ex.01-03.s02", "nativePrompt": "Der Himmel ist blau.", "targetWords": ["Il", "cielo", "è", "blu."]},
+    {"kind": "sentence_builder", "exerciseId": "ex.01-03.s03", "nativePrompt": "Das Gras ist grün.", "targetWords": ["L'erba", "è", "verde."]}
+  ]
+}

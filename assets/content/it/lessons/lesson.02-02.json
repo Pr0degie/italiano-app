@@ -1,0 +1,16 @@
+{
+  "id": "lesson.02-02",
+  "chapterId": "chapter.02",
+  "sortOrder": 2,
+  "title": "Einkaufen",
+  "steps": [
+    {"kind": "vocab", "itemId": "vocab.pane", "target": "pane", "native": "Brot", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.latte", "target": "latte", "native": "Milch", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.frutta", "target": "frutta", "native": "Obst", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.verdura", "target": "verdura", "native": "Gemüse", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.carne", "target": "carne", "native": "Fleisch", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.pesce", "target": "pesce", "native": "Fisch", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.prezzo", "target": "prezzo", "native": "Preis", "partOfSpeech": "noun"},
+    {"kind": "vocab", "itemId": "vocab.mercato", "target": "mercato", "native": "Markt", "partOfSpeech": "noun"}
+  ]
+}
