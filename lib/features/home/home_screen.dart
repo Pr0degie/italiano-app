@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants.dart';
 import '../lesson/lesson_player_screen.dart';
+import '../stats/stats_screen.dart';
 import 'home_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -12,7 +13,19 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(homeDataProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Italiano')),
+      appBar: AppBar(
+        title: const Text('Italiano'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bar_chart),
+            tooltip: 'Statistik',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const StatsScreen()),
+            ),
+          ),
+        ],
+      ),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Fehler: $e')),
