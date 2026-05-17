@@ -20,14 +20,18 @@ sealed class AnyExerciseStep {}
 class MCExerciseStep extends AnyExerciseStep {
   MCExerciseStep({required this.vocab, required this.options});
   final VocabStepData vocab;
-  final List<String> options; // 4 shuffled German translations, one correct
+  final List<String> options; // 4 shuffled native translations, one correct
 }
 
 @immutable
 class SentenceBuilderStep extends AnyExerciseStep {
-  SentenceBuilderStep({required this.german, required this.italianWords});
-  final String german;
-  final List<String> italianWords; // korrekte Reihenfolge
+  SentenceBuilderStep({required this.nativePrompt, required this.targetWords});
+
+  /// Satz in der Muttersprache (Frage).
+  final String nativePrompt;
+
+  /// Wörter in der Zielsprache in korrekter Reihenfolge.
+  final List<String> targetWords;
 }
 
 // Backwards-compat alias so bestehende call-sites (falls vorhanden) nicht brechen
@@ -115,11 +119,11 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
   }
 
   void _buildExercisePhase() {
-    final allTranslations = state.steps.map((s) => s.translationDe).toList();
+    final allTranslations = state.steps.map((s) => s.native).toList();
 
     // MC-Übungen aus Vokabeln
     final mcSteps = state.steps.map((v) {
-      final correct = v.translationDe;
+      final correct = v.native;
       final distractors =
           (allTranslations.where((t) => t != correct).toList()..shuffle(_rng));
       final options = ([correct, ...distractors.take(3)]..shuffle(_rng));
@@ -130,8 +134,8 @@ class LessonSessionNotifier extends Notifier<LessonSessionState> {
     final sentences = sentencesByLesson[_lessonId] ?? [];
     final sentenceSteps = sentences
         .map((s) => SentenceBuilderStep(
-              german: s.german,
-              italianWords: s.italian,
+              nativePrompt: s.nativePrompt,
+              targetWords: s.targetWords,
             ))
         .toList();
 

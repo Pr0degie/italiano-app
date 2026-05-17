@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/constants.dart';
 import '../../core/database/database.dart';
 import '../../core/database/providers.dart';
 import '../../core/sm2/sm2.dart';
@@ -29,7 +30,7 @@ class ReviewExerciseStep {
     required this.lastReviewedDate,
     required this.masteredAt,
     required this.vocab,
-    required this.showItaliano,
+    required this.showTarget,
     required this.options,
   });
   final String itemId;
@@ -40,7 +41,10 @@ class ReviewExerciseStep {
   final String? lastReviewedDate;
   final DateTime? masteredAt;
   final VocabStepData vocab;
-  final bool showItaliano;
+
+  /// true → Zielsprache wird gefragt, Optionen sind in der Muttersprache.
+  /// false → umgekehrt.
+  final bool showTarget;
   final List<McOption> options;
 }
 
@@ -164,15 +168,16 @@ class ReviewSessionNotifier extends Notifier<ReviewSessionState> {
 
       final allVocabItems = await db.select(db.vocabItems).get();
       final allTrans = await db.select(db.itemTranslations).get();
-      final transDE = allTrans.where((t) => t.lang == 'de').toList();
+      final nativeTrans =
+          allTrans.where((t) => t.lang == AppConstants.activeLang).toList();
       final vocabMap = {for (final v in allVocabItems) v.itemId: v};
-      final transMap = {for (final t in transDE) t.itemId: t.translation};
+      final transMap = {for (final t in nativeTrans) t.itemId: t.translation};
 
       final allVocab = allVocabItems
           .map((v) => VocabStepData(
                 itemId: v.itemId,
-                italiano: v.front,
-                translationDe: transMap[v.itemId] ?? '',
+                target: v.front,
+                native: transMap[v.itemId] ?? '',
                 partOfSpeech: v.partOfSpeech,
               ))
           .toList();
@@ -182,12 +187,12 @@ class ReviewSessionNotifier extends Notifier<ReviewSessionState> {
         final v = vocabMap[rs.itemId];
         final vocab = VocabStepData(
           itemId: rs.itemId,
-          italiano: v?.front ?? rs.itemId,
-          translationDe: transMap[rs.itemId] ?? '',
+          target: v?.front ?? rs.itemId,
+          native: transMap[rs.itemId] ?? '',
           partOfSpeech: v?.partOfSpeech,
         );
-        final showIT = _rng.nextBool();
-        final options = _buildOptions(vocab, showIT, allVocab);
+        final showTarget = _rng.nextBool();
+        final options = _buildOptions(vocab, showTarget, allVocab);
         steps.add(ReviewExerciseStep(
           itemId: rs.itemId,
           reviewEasiness: rs.easiness,
@@ -197,7 +202,7 @@ class ReviewSessionNotifier extends Notifier<ReviewSessionState> {
           lastReviewedDate: rs.lastReviewedDate,
           masteredAt: rs.masteredAt,
           vocab: vocab,
-          showItaliano: showIT,
+          showTarget: showTarget,
           options: options,
         ));
       }
@@ -214,13 +219,13 @@ class ReviewSessionNotifier extends Notifier<ReviewSessionState> {
   }
 
   List<McOption> _buildOptions(
-      VocabStepData correct, bool showItaliano, List<VocabStepData> all) {
-    final correctText =
-        showItaliano ? correct.translationDe : correct.italiano;
+      VocabStepData correct, bool showTarget, List<VocabStepData> all) {
+    // Wenn die Zielsprache angezeigt wird, sind die Optionen in der Muttersprache.
+    final correctText = showTarget ? correct.native : correct.target;
     final pool =
         all.where((v) => v.itemId != correct.itemId).toList()..shuffle(_rng);
     final distractors = pool.take(3).map((v) => McOption(
-          text: showItaliano ? v.translationDe : v.italiano,
+          text: showTarget ? v.native : v.target,
           isCorrect: false,
         )).toList();
     // Auffüllen falls weniger als 3 Distraktoren vorhanden

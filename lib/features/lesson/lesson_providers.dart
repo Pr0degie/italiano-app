@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants.dart';
 import '../../core/database/database.dart';
 import '../../core/database/providers.dart';
 
@@ -9,13 +10,17 @@ import '../../core/database/providers.dart';
 class VocabStepData {
   const VocabStepData({
     required this.itemId,
-    required this.italiano,
-    required this.translationDe,
+    required this.target,
+    required this.native,
     required this.partOfSpeech,
   });
   final String itemId;
-  final String italiano;
-  final String translationDe;
+
+  /// Wort in der Zielsprache (z.B. italienisch).
+  final String target;
+
+  /// Übersetzung in der Muttersprache des Nutzers.
+  final String native;
   final String? partOfSpeech;
 }
 
@@ -44,7 +49,8 @@ final lessonDataProvider =
 Future<LessonData> loadLesson(AppDatabase db, String lessonId) async {
   // Lesson title
   final lt = await (db.select(db.lessonTranslations)
-        ..where((t) => t.lessonId.equals(lessonId) & t.lang.equals('de')))
+        ..where((t) =>
+            t.lessonId.equals(lessonId) & t.lang.equals(AppConstants.activeLang)))
       .getSingleOrNull();
 
   // Steps for this lesson (ordered by sortOrder)
@@ -62,9 +68,10 @@ Future<LessonData> loadLesson(AppDatabase db, String lessonId) async {
       .get();
   final vocabMap = {for (final v in vocabItems) v.itemId: v};
 
-  // Translations (DE)
+  // Translations in native language
   final translations = await (db.select(db.itemTranslations)
-        ..where((t) => t.itemId.isIn(itemIds) & t.lang.equals('de')))
+        ..where(
+            (t) => t.itemId.isIn(itemIds) & t.lang.equals(AppConstants.activeLang)))
       .get();
   final transMap = {for (final t in translations) t.itemId: t.translation};
 
@@ -72,8 +79,8 @@ Future<LessonData> loadLesson(AppDatabase db, String lessonId) async {
     final v = vocabMap[id];
     return VocabStepData(
       itemId: id,
-      italiano: v?.front ?? id,
-      translationDe: transMap[id] ?? '',
+      target: v?.front ?? id,
+      native: transMap[id] ?? '',
       partOfSpeech: v?.partOfSpeech,
     );
   }).toList();
@@ -92,14 +99,14 @@ Future<LessonData> loadLesson(AppDatabase db, String lessonId) async {
 Future<List<VocabStepData>> _loadAllVocab(AppDatabase db) async {
   final all = await db.select(db.vocabItems).get();
   final allTrans = await (db.select(db.itemTranslations)
-        ..where((t) => t.lang.equals('de')))
+        ..where((t) => t.lang.equals(AppConstants.activeLang)))
       .get();
   final transMap = {for (final t in allTrans) t.itemId: t.translation};
   return all
       .map((v) => VocabStepData(
             itemId: v.itemId,
-            italiano: v.front,
-            translationDe: transMap[v.itemId] ?? '',
+            target: v.front,
+            native: transMap[v.itemId] ?? '',
             partOfSpeech: v.partOfSpeech,
           ))
       .toList();

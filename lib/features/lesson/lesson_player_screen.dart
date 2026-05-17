@@ -91,7 +91,7 @@ class _IntroScreenState extends ConsumerState<_IntroScreen> {
               front: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(step.italiano,
+                  Text(step.target,
                       style: tt.displaySmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center),
@@ -101,7 +101,7 @@ class _IntroScreenState extends ConsumerState<_IntroScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(step.italiano,
+                  Text(step.target,
                       style: tt.displaySmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center),
@@ -114,7 +114,7 @@ class _IntroScreenState extends ConsumerState<_IntroScreen> {
                     const SizedBox(height: 14),
                   ] else
                     const SizedBox(height: 24),
-                  Text(step.translationDe,
+                  Text(step.native,
                       style: tt.headlineSmall,
                       textAlign: TextAlign.center),
                 ],
@@ -161,8 +161,8 @@ class _ExerciseScreen extends ConsumerWidget {
               ),
             SentenceBuilderStep s => SentenceBuilderWidget(
                 key: ValueKey('sb-${session.currentIndex}'),
-                germanSentence: s.german,
-                italianWords: s.italianWords,
+                nativeSentence: s.nativePrompt,
+                targetWords: s.targetWords,
                 onComplete: notifier.answerExercise,
               ),
           },
@@ -217,9 +217,9 @@ class _MCExerciseBodyState extends State<_MCExerciseBody> {
   @override
   Widget build(BuildContext context) {
     final step = widget.step;
-    final correct = step.vocab.translationDe;
+    final correct = step.vocab.native;
     final wordWidget = Text(
-      step.vocab.italiano,
+      step.vocab.target,
       style: Theme.of(context)
           .textTheme
           .displaySmall

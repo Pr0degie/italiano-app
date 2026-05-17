@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Spielt italienischen Text vor — per Long-Press auf beliebige Wörter/Sätze.
+/// Spielt Text in der Zielsprache vor — per Long-Press auf beliebige Wörter/Sätze.
 ///
 /// Stufe 4 ersetzt [_NoOpAudioService] durch eine echte Implementierung
 /// (flutter_tts oder Asset-Audio). Alle Widgets bleiben unverändert.
@@ -8,8 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Verwendung in Widgets:
 /// ```dart
 /// GestureDetector(
-///   onLongPress: () => ref.read(audioServiceProvider).speak(italianoText),
-///   child: Text(italianoText),
+///   onLongPress: () => ref.read(audioServiceProvider).speak(targetText),
+///   child: Text(targetText),
 /// )
 /// ```
 abstract class AudioService {

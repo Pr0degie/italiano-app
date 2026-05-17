@@ -21,22 +21,22 @@ class _SlotDrag extends _DragData {
 
 // ── Widget ────────────────────────────────────────────────────────────────────
 
-/// Satz-Bau-Widget: deutscher Satz oben, darunter leere Slots,
-/// darunter die italienischen Wörter in zufälliger Reihenfolge.
+/// Satz-Bau-Widget: Muttersprachen-Satz oben, darunter leere Slots,
+/// darunter die Zielsprache-Wörter in zufälliger Reihenfolge.
 ///
-/// - [germanSentence]: anzuzeigender deutscher Satz
-/// - [italianWords]: korrekte Reihenfolge der italienischen Wörter
+/// - [nativeSentence]: anzuzeigender Satz in der Muttersprache (Frage)
+/// - [targetWords]: korrekte Reihenfolge der Zielsprache-Wörter
 /// - [onComplete]: Callback wenn Nutzer nach Ergebnis auf "Weiter →" tippt
 class SentenceBuilderWidget extends StatefulWidget {
   const SentenceBuilderWidget({
     super.key,
-    required this.germanSentence,
-    required this.italianWords,
+    required this.nativeSentence,
+    required this.targetWords,
     required this.onComplete,
   });
 
-  final String germanSentence;
-  final List<String> italianWords;
+  final String nativeSentence;
+  final List<String> targetWords;
 
   /// Wird aufgerufen wenn der Nutzer nach dem Ergebnis auf "Weiter →" tippt.
   final void Function(bool correct) onComplete;
@@ -54,8 +54,8 @@ class _SentenceBuilderWidgetState extends State<SentenceBuilderWidget> {
   @override
   void initState() {
     super.initState();
-    _pool = widget.italianWords.toList()..shuffle();
-    _slots = List.filled(widget.italianWords.length, null);
+    _pool = widget.targetWords.toList()..shuffle();
+    _slots = List.filled(widget.targetWords.length, null);
   }
 
   // ── Tap-Logik ────────────────────────────────────────────────────────────
@@ -115,7 +115,7 @@ class _SentenceBuilderWidgetState extends State<SentenceBuilderWidget> {
     final correct = _slots
         .asMap()
         .entries
-        .every((e) => e.value == widget.italianWords[e.key]);
+        .every((e) => e.value == widget.targetWords[e.key]);
     setState(() {
       _submitted = true;
       _isCorrect = correct;
@@ -130,9 +130,9 @@ class _SentenceBuilderWidgetState extends State<SentenceBuilderWidget> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Spacer(flex: 1),
-        // Deutscher Satz — oberer Mittelbereich
+        // Satz in der Muttersprache — oberer Mittelbereich
         Text(
-          widget.germanSentence,
+          widget.nativeSentence,
           style: Theme.of(context).textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
@@ -140,7 +140,7 @@ class _SentenceBuilderWidgetState extends State<SentenceBuilderWidget> {
         // Slots (Drop-Zonen)
         _SlotsArea(
           slots: _slots,
-          correctWords: widget.italianWords,
+          correctWords: widget.targetWords,
           submitted: _submitted,
           onTap: _tapSlot,
           onDrop: _dropOnSlot,

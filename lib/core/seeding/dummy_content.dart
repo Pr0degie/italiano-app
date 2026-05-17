@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../constants.dart';
 import '../database/database.dart';
 
 /// Dummy-Content für Stufe 1.
@@ -25,7 +26,7 @@ class DummyContent {
       await db.into(db.chapterTranslations).insertOnConflictUpdate(
             ChapterTranslationsCompanion.insert(
               chapterId: id,
-              lang: 'de',
+              lang: AppConstants.activeLang,
               title: title,
             ),
           );
@@ -55,7 +56,7 @@ class DummyContent {
       await db.into(db.lessonTranslations).insertOnConflictUpdate(
             LessonTranslationsCompanion.insert(
               lessonId: id,
-              lang: 'de',
+              lang: AppConstants.activeLang,
               title: title,
             ),
           );
@@ -66,7 +67,7 @@ class DummyContent {
 
   static Future<void> _seedVocab(AppDatabase db) async {
     final vocabByLesson = <String, List<(String, String, String, String)>>{
-      // lessonId → [(itemId, italiano, traduzione_de, partOfSpeech)]
+      // lessonId → [(itemId, target, native, partOfSpeech)]
       'lesson.01-01': [
         ('vocab.ciao', 'ciao', 'hallo / tschüss', 'interj'),
         ('vocab.buongiorno', 'buongiorno', 'guten Morgen', 'interj'),
@@ -133,7 +134,7 @@ class DummyContent {
       final lessonId = entry.key;
       final items = entry.value;
       for (var i = 0; i < items.length; i++) {
-        final (itemId, italiano, traduzione, pos) = items[i];
+        final (itemId, target, native, pos) = items[i];
 
         await db.into(db.items).insertOnConflictUpdate(
               ItemsCompanion.insert(id: itemId, type: 'vocab'),
@@ -141,15 +142,15 @@ class DummyContent {
         await db.into(db.vocabItems).insertOnConflictUpdate(
               VocabItemsCompanion.insert(
                 itemId: itemId,
-                front: italiano,
+                front: target,
                 partOfSpeech: Value(pos),
               ),
             );
         await db.into(db.itemTranslations).insertOnConflictUpdate(
               ItemTranslationsCompanion.insert(
                 itemId: itemId,
-                lang: 'de',
-                translation: traduzione,
+                lang: AppConstants.activeLang,
+                translation: native,
               ),
             );
         await db.into(db.lessonSteps).insertOnConflictUpdate(

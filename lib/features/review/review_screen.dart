@@ -78,8 +78,8 @@ class _ReviewExerciseScreen extends ConsumerWidget {
 
     final isRetry = session.isInRetryPhase;
     final questionText =
-        step.showItaliano ? step.vocab.italiano : step.vocab.translationDe;
-    final questionLabel = step.showItaliano
+        step.showTarget ? step.vocab.target : step.vocab.native;
+    final questionLabel = step.showTarget
         ? 'Wie heißt auf Deutsch?'
         : 'Wie heißt auf Italienisch?';
 
@@ -121,7 +121,7 @@ class _ReviewExerciseScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               GestureDetector(
                 onLongPress: () =>
-                    ref.read(audioServiceProvider).speak(step.vocab.italiano),
+                    ref.read(audioServiceProvider).speak(step.vocab.target),
                 child: Text(
                   questionText,
                   style: Theme.of(context)
