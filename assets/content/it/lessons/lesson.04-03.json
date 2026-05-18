@@ -1,0 +1,145 @@
+{
+  "id": "lesson.04-03",
+  "chapterId": "chapter.04",
+  "sortOrder": 3,
+  "title": "Häufige Verben",
+  "steps": [
+    {
+      "kind": "vocab",
+      "itemId": "vocab.essere",
+      "target": "essere",
+      "native": "sein",
+      "partOfSpeech": "verb",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.avere",
+      "target": "avere",
+      "native": "haben",
+      "partOfSpeech": "verb",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.fare",
+      "target": "fare",
+      "native": "machen / tun",
+      "partOfSpeech": "verb",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.andare",
+      "target": "andare",
+      "native": "gehen / fahren",
+      "partOfSpeech": "verb",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.venire",
+      "target": "venire",
+      "native": "kommen",
+      "partOfSpeech": "verb"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.mangiare",
+      "target": "mangiare",
+      "native": "essen",
+      "partOfSpeech": "verb"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.bere",
+      "target": "bere",
+      "native": "trinken",
+      "partOfSpeech": "verb"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.parlare",
+      "target": "parlare",
+      "native": "sprechen/reden",
+      "partOfSpeech": "verb",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.vedere",
+      "target": "vedere",
+      "native": "sehen",
+      "partOfSpeech": "verb",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.sapere",
+      "target": "sapere",
+      "native": "wissen / können",
+      "partOfSpeech": "verb",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.potere",
+      "target": "potere",
+      "native": "können / dürfen",
+      "partOfSpeech": "verb",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.dovere",
+      "target": "dovere",
+      "native": "müssen",
+      "partOfSpeech": "verb",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.riuscire",
+      "target": "riuscire",
+      "native": "schaffen / können (etw. gelingt)",
+      "partOfSpeech": "verb",
+      "suggested": "typing"
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.04-03.s01",
+      "nativePrompt": "Ich bin Italiener und spreche Deutsch.",
+      "targetWords": [
+        "Sono",
+        "italiano",
+        "e",
+        "parlo",
+        "tedesco."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.04-03.s02",
+      "nativePrompt": "Ich gehe eine Pizza essen.",
+      "targetWords": [
+        "Vado",
+        "a",
+        "mangiare",
+        "una",
+        "pizza."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.04-03.s03",
+      "nativePrompt": "Kommst du morgen zu mir nach Hause?",
+      "targetWords": [
+        "Vieni",
+        "a",
+        "casa",
+        "mia",
+        "domani?"
+      ]
+    }
+  ]
+}

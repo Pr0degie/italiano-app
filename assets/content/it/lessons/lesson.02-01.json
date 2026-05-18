@@ -2,15 +2,120 @@
   "id": "lesson.02-01",
   "chapterId": "chapter.02",
   "sortOrder": 1,
-  "title": "Im Café",
+  "title": "Familie",
   "steps": [
-    {"kind": "vocab", "itemId": "vocab.caffe", "target": "caffè", "native": "Kaffee", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.cappuccino", "target": "cappuccino", "native": "Cappuccino", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.acqua", "target": "acqua", "native": "Wasser", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.te", "target": "tè", "native": "Tee", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.cornetto", "target": "cornetto", "native": "Croissant", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.conto", "target": "conto", "native": "Rechnung", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.tavolo", "target": "tavolo", "native": "Tisch", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.cameriere", "target": "cameriere", "native": "Kellner", "partOfSpeech": "noun"}
+    {
+      "kind": "vocab",
+      "itemId": "vocab.madre",
+      "target": "madre",
+      "native": "Mutter",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.padre",
+      "target": "padre",
+      "native": "Vater",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.fratello",
+      "target": "fratello",
+      "native": "Bruder",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.sorella",
+      "target": "sorella",
+      "native": "Schwester",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.figlio",
+      "target": "figlio",
+      "native": "Sohn",
+      "partOfSpeech": "noun"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.figlia",
+      "target": "figlia",
+      "native": "Tochter",
+      "partOfSpeech": "noun"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.nonno",
+      "target": "nonno",
+      "native": "Großvater",
+      "partOfSpeech": "noun"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.nonna",
+      "target": "nonna",
+      "native": "Großmutter",
+      "partOfSpeech": "noun",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.zio",
+      "target": "zio",
+      "native": "Onkel",
+      "partOfSpeech": "noun",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.zia",
+      "target": "zia",
+      "native": "Tante",
+      "partOfSpeech": "noun",
+      "suggested": "typing"
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.02-01.s01",
+      "nativePrompt": "Meine Mutter ist nett.",
+      "targetWords": [
+        "Mia",
+        "madre",
+        "è",
+        "simpatica."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.02-01.s02",
+      "nativePrompt": "Ich habe einen Bruder und eine Schwester.",
+      "targetWords": [
+        "Ho",
+        "un",
+        "fratello",
+        "e",
+        "una",
+        "sorella."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.02-01.s03",
+      "nativePrompt": "Mein Vater arbeitet in Rom.",
+      "targetWords": [
+        "Mio",
+        "padre",
+        "lavora",
+        "a",
+        "Roma."
+      ]
+    }
   ]
 }

@@ -1,0 +1,125 @@
+{
+  "id": "lesson.04-01",
+  "chapterId": "chapter.04",
+  "sortOrder": 1,
+  "title": "Farben",
+  "steps": [
+    {
+      "kind": "vocab",
+      "itemId": "vocab.rosso",
+      "target": "rosso",
+      "native": "rot",
+      "partOfSpeech": "adj",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.blu",
+      "target": "blu",
+      "native": "blau",
+      "partOfSpeech": "adj",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.verde",
+      "target": "verde",
+      "native": "grün",
+      "partOfSpeech": "adj",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.giallo",
+      "target": "giallo",
+      "native": "gelb",
+      "partOfSpeech": "adj",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.bianco",
+      "target": "bianco",
+      "native": "weiß",
+      "partOfSpeech": "adj"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.nero",
+      "target": "nero",
+      "native": "schwarz",
+      "partOfSpeech": "adj"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.grigio",
+      "target": "grigio",
+      "native": "grau",
+      "partOfSpeech": "adj"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.marrone",
+      "target": "marrone",
+      "native": "braun",
+      "partOfSpeech": "adj",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.arancione",
+      "target": "arancione",
+      "native": "orange",
+      "partOfSpeech": "adj",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.viola",
+      "target": "viola",
+      "native": "lila",
+      "partOfSpeech": "adj",
+      "suggested": "typing"
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.04-01.s01",
+      "nativePrompt": "Mein Auto ist rot.",
+      "targetWords": [
+        "La",
+        "mia",
+        "macchina",
+        "è",
+        "rossa."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.04-01.s02",
+      "nativePrompt": "Der Himmel ist blau und das Gras ist grün.",
+      "targetWords": [
+        "Il",
+        "cielo",
+        "è",
+        "blu",
+        "e",
+        "l'erba",
+        "è",
+        "verde."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.04-01.s03",
+      "nativePrompt": "Ich habe ein weiß-schwarzes Shirt.",
+      "targetWords": [
+        "Ho",
+        "una",
+        "maglia",
+        "bianca",
+        "e",
+        "nera."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "id": "lesson.03-01",
+  "chapterId": "chapter.03",
+  "sortOrder": 1,
+  "title": "Essen",
+  "steps": [
+    {
+      "kind": "vocab",
+      "itemId": "vocab.pane",
+      "target": "pane",
+      "native": "Brot",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.acqua",
+      "target": "acqua",
+      "native": "Wasser",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.formaggio",
+      "target": "formaggio",
+      "native": "Käse",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.pasta",
+      "target": "pasta",
+      "native": "Pasta / Nudeln",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.pizza",
+      "target": "pizza",
+      "native": "Pizza",
+      "partOfSpeech": "noun"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.pomodoro",
+      "target": "pomodoro",
+      "native": "Tomate",
+      "partOfSpeech": "noun"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.mela",
+      "target": "mela",
+      "native": "Apfel",
+      "partOfSpeech": "noun"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.frutta",
+      "target": "frutta",
+      "native": "Obst",
+      "partOfSpeech": "noun",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.verdura",
+      "target": "verdura",
+      "native": "Gemüse",
+      "partOfSpeech": "noun",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.carne",
+      "target": "carne",
+      "native": "Fleisch",
+      "partOfSpeech": "noun",
+      "suggested": "typing"
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.03-01.s01",
+      "nativePrompt": "Ich möchte eine Pizza und ein Wasser.",
+      "targetWords": [
+        "Voglio",
+        "una",
+        "pizza",
+        "e",
+        "un'acqua."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.03-01.s02",
+      "nativePrompt": "Ich mag Tomaten-Pasta.",
+      "targetWords": [
+        "Mi",
+        "piace",
+        "la",
+        "pasta",
+        "al",
+        "pomodoro."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.03-01.s03",
+      "nativePrompt": "Ich habe Hunger, ich esse Brot.",
+      "targetWords": [
+        "Ho",
+        "fame,",
+        "mangio",
+        "del",
+        "pane."
+      ]
+    }
+  ]
+}

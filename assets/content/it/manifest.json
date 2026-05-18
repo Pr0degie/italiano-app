@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": 3,
+  "contentVersion": 4,
   "targetLang": "it",
   "nativeLang": "de",
   "chapters": [
@@ -10,18 +10,36 @@
       "sortOrder": 1,
       "lessonFiles": [
         "lessons/lesson.01-01.json",
-        "lessons/lesson.01-02.json",
-        "lessons/lesson.01-03.json"
+        "lessons/lesson.01-02.json"
       ]
     },
     {
       "id": "chapter.02",
-      "title": "Alltag",
+      "title": "Menschen",
       "sortOrder": 2,
       "lessonFiles": [
         "lessons/lesson.02-01.json",
-        "lessons/lesson.02-02.json",
-        "lessons/lesson.02-03.json"
+        "lessons/lesson.02-02.json"
+      ]
+    },
+    {
+      "id": "chapter.03",
+      "title": "Essen & Trinken",
+      "sortOrder": 3,
+      "lessonFiles": [
+        "lessons/lesson.03-01.json",
+        "lessons/lesson.03-02.json"
+      ]
+    },
+    {
+      "id": "chapter.04",
+      "title": "Alltag",
+      "sortOrder": 4,
+      "lessonFiles": [
+        "lessons/lesson.04-01.json",
+        "lessons/lesson.04-02.json",
+        "lessons/lesson.04-03.json",
+        "lessons/lesson.04-04.json"
       ]
     }
   ]

@@ -1,0 +1,131 @@
+{
+  "id": "lesson.04-02",
+  "chapterId": "chapter.04",
+  "sortOrder": 2,
+  "title": "Wochentage & Tageszeiten",
+  "steps": [
+    {
+      "kind": "vocab",
+      "itemId": "vocab.lunedi",
+      "target": "lunedì",
+      "native": "Montag",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.martedi",
+      "target": "martedì",
+      "native": "Dienstag",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.mercoledi",
+      "target": "mercoledì",
+      "native": "Mittwoch",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.giovedi",
+      "target": "giovedì",
+      "native": "Donnerstag",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.venerdi",
+      "target": "venerdì",
+      "native": "Freitag",
+      "partOfSpeech": "noun"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.sabato",
+      "target": "sabato",
+      "native": "Samstag",
+      "partOfSpeech": "noun"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.domenica",
+      "target": "domenica",
+      "native": "Sonntag",
+      "partOfSpeech": "noun"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.oggi",
+      "target": "oggi",
+      "native": "heute",
+      "partOfSpeech": "adv",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.domani",
+      "target": "domani",
+      "native": "morgen",
+      "partOfSpeech": "adv",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.ieri",
+      "target": "ieri",
+      "native": "gestern",
+      "partOfSpeech": "adv",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.dopodomani",
+      "target": "dopodomani",
+      "native": "übermorgen",
+      "partOfSpeech": "adv",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.altroieri",
+      "target": "l'altroieri",
+      "native": "vorgestern",
+      "partOfSpeech": "adv",
+      "suggested": "typing"
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.04-02.s01",
+      "nativePrompt": "Heute ist Freitag.",
+      "targetWords": [
+        "Oggi",
+        "è",
+        "venerdì."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.04-02.s02",
+      "nativePrompt": "Morgen ist Samstag.",
+      "targetWords": [
+        "Domani",
+        "è",
+        "sabato."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.04-02.s03",
+      "nativePrompt": "Wir sehen uns am Montag!",
+      "targetWords": [
+        "Ci",
+        "vediamo",
+        "lunedì!"
+      ]
+    }
+  ]
+}

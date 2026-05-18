@@ -1,0 +1,121 @@
+{
+  "id": "lesson.04-04",
+  "chapterId": "chapter.04",
+  "sortOrder": 4,
+  "title": "Im Haus",
+  "steps": [
+    {
+      "kind": "vocab",
+      "itemId": "vocab.casa",
+      "target": "casa",
+      "native": "Haus / Zuhause",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.porta",
+      "target": "porta",
+      "native": "Tür",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.finestra",
+      "target": "finestra",
+      "native": "Fenster",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.stanza",
+      "target": "stanza",
+      "native": "Zimmer",
+      "partOfSpeech": "noun",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.cucina",
+      "target": "cucina",
+      "native": "Küche",
+      "partOfSpeech": "noun"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.bagno",
+      "target": "bagno",
+      "native": "Bad",
+      "partOfSpeech": "noun"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.letto",
+      "target": "letto",
+      "native": "Bett",
+      "partOfSpeech": "noun"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.tavolo",
+      "target": "tavolo",
+      "native": "Tisch",
+      "partOfSpeech": "noun",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.sedia",
+      "target": "sedia",
+      "native": "Stuhl",
+      "partOfSpeech": "noun",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.divano",
+      "target": "divano",
+      "native": "Sofa",
+      "partOfSpeech": "noun",
+      "suggested": "typing"
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.04-04.s01",
+      "nativePrompt": "Die Küche ist groß.",
+      "targetWords": [
+        "La",
+        "cucina",
+        "è",
+        "grande."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.04-04.s02",
+      "nativePrompt": "Es gibt einen Tisch und vier Stühle.",
+      "targetWords": [
+        "C'è",
+        "un",
+        "tavolo",
+        "e",
+        "quattro",
+        "sedie."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.04-04.s03",
+      "nativePrompt": "Öffne das Fenster, bitte.",
+      "targetWords": [
+        "Apri",
+        "la",
+        "finestra,",
+        "per",
+        "favore."
+      ]
+    }
+  ]
+}

@@ -2,15 +2,123 @@
   "id": "lesson.02-02",
   "chapterId": "chapter.02",
   "sortOrder": 2,
-  "title": "Einkaufen",
+  "title": "Adjektive",
   "steps": [
-    {"kind": "vocab", "itemId": "vocab.pane", "target": "pane", "native": "Brot", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.latte", "target": "latte", "native": "Milch", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.frutta", "target": "frutta", "native": "Obst", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.verdura", "target": "verdura", "native": "Gemüse", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.carne", "target": "carne", "native": "Fleisch", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.pesce", "target": "pesce", "native": "Fisch", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.prezzo", "target": "prezzo", "native": "Preis", "partOfSpeech": "noun"},
-    {"kind": "vocab", "itemId": "vocab.mercato", "target": "mercato", "native": "Markt", "partOfSpeech": "noun"}
+    {
+      "kind": "vocab",
+      "itemId": "vocab.grande",
+      "target": "grande",
+      "native": "groß",
+      "partOfSpeech": "adj",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.piccolo",
+      "target": "piccolo",
+      "native": "klein",
+      "partOfSpeech": "adj",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.bello",
+      "target": "bello",
+      "native": "schön",
+      "partOfSpeech": "adj",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.brutto",
+      "target": "brutto",
+      "native": "hässlich / schlecht",
+      "partOfSpeech": "adj",
+      "suggested": "pair"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.buono",
+      "target": "buono",
+      "native": "gut / lecker",
+      "partOfSpeech": "adj"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.cattivo",
+      "target": "cattivo",
+      "native": "schlecht / böse",
+      "partOfSpeech": "adj"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.nuovo",
+      "target": "nuovo",
+      "native": "neu",
+      "partOfSpeech": "adj"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.vecchio",
+      "target": "vecchio",
+      "native": "alt",
+      "partOfSpeech": "adj",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.alto",
+      "target": "alto",
+      "native": "hoch / groß (Person)",
+      "partOfSpeech": "adj",
+      "suggested": "typing"
+    },
+    {
+      "kind": "vocab",
+      "itemId": "vocab.basso",
+      "target": "basso",
+      "native": "niedrig / klein (Person)",
+      "partOfSpeech": "adj",
+      "suggested": "typing"
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.02-02.s01",
+      "nativePrompt": "Das Haus ist groß und schön.",
+      "targetWords": [
+        "La",
+        "casa",
+        "è",
+        "grande",
+        "e",
+        "bella."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.02-02.s02",
+      "nativePrompt": "Der Kaffee ist sehr gut.",
+      "targetWords": [
+        "Il",
+        "caffè",
+        "è",
+        "molto",
+        "buono."
+      ]
+    },
+    {
+      "kind": "sentence_builder",
+      "exerciseId": "ex.02-02.s03",
+      "nativePrompt": "Marco ist groß und Anna ist klein.",
+      "targetWords": [
+        "Marco",
+        "è",
+        "alto",
+        "e",
+        "Anna",
+        "è",
+        "bassa."
+      ]
+    }
   ]
 }
