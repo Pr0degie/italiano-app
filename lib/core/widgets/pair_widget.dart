@@ -67,10 +67,34 @@ class _PairWidgetState extends ConsumerState<PairWidget> {
     final n = widget.targets.length;
     _targetOrder = List.generate(n, (i) => i)..shuffle();
     _nativeOrder = List.generate(n, (i) => i)..shuffle();
+    // richtige Paare dürfen nicht auf gleicher Höhe stehen
+    if (n >= 2) {
+      var tries = 0;
+      while (_hasAlignedPair() && tries < 50) {
+        _nativeOrder.shuffle();
+        tries++;
+      }
+      // Fallback: jeden Kollisionsindex mit Nachbar tauschen
+      for (var i = 0; i < n; i++) {
+        if (_targetOrder[i] == _nativeOrder[i]) {
+          final j = (i + 1) % n;
+          final tmp = _nativeOrder[i];
+          _nativeOrder[i] = _nativeOrder[j];
+          _nativeOrder[j] = tmp;
+        }
+      }
+    }
     _targetMatched = List.filled(n, false);
     _nativeMatched = List.filled(n, false);
     _targetWrong = List.filled(n, false);
     _nativeWrong = List.filled(n, false);
+  }
+
+  bool _hasAlignedPair() {
+    for (var i = 0; i < _targetOrder.length; i++) {
+      if (_targetOrder[i] == _nativeOrder[i]) return true;
+    }
+    return false;
   }
 
   // ── Logik ──────────────────────────────────────────────────────────────────
